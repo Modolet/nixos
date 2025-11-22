@@ -64,17 +64,25 @@ in
   config =
     with config.lib.colorScheme;
     let
-      colorSchemes = config.colorSchemes |> map convertColorScheme;
+      colorSchemes = map convertColorScheme config.colorSchemes;
     in
     {
       stylix = {
         enable = true;
-        inherit (builtins.filter (c: c.isDefault) colorSchemes |> builtins.head |> buildColorScheme)
+        inherit (buildColorScheme (
+          builtins.head (
+            builtins.filter (c: c.isDefault) colorSchemes
+          )
+        ))
           base16Scheme
           polarity
           ;
       };
       specialisation =
-        builtins.filter (c: !c.isDefault) colorSchemes |> map buildSpecialisation |> builtins.listToAttrs;
+        builtins.listToAttrs (
+          map buildSpecialisation (
+            builtins.filter (c: !c.isDefault) colorSchemes
+          )
+        );
     };
 }
