@@ -47,6 +47,12 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.modolet = import ./home.nix;
+    extraSpecialArgs = { inherit nixvim; };
+    users.modolet = {
+      imports = [
+        nixvim.homeModules.nixvim
+        ./home.nix
+      ];
+    };
   };
 }
