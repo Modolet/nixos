@@ -17,7 +17,6 @@
   # 启用 Neovim 配置
   modules.nvim = {
     enable = true;
-    defaultEditor = true;
   };
 
   # 用户专属配置可以在这里添加
