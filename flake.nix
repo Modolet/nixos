@@ -44,7 +44,7 @@
                 extraSpecialArgs = { inherit inputs; };
 
                 # 导入 nixvim 的 Home Manager 模块
-                sharedModules = [ nixvim.homeManagerModules.nixvim ];
+                sharedModules = [ nixvim.homeModules.nixvim ];
 
                 users.modolet = {
                   imports = [

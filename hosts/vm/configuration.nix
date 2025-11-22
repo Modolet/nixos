@@ -14,7 +14,6 @@
     enable = true;
     efiSupport = true; # 启用EFI支持
     device = "nodev"; # 无特定设备，EFI处理启动
-    version = 2;
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
