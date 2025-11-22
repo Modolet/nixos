@@ -190,6 +190,80 @@ nixos/
 
 这个框架结构提供了灵活的基础，可以根据实际需求逐步添加具体的功能模块和配置。
 
+## 当前实现状态
+
+### 已完成的配置结构
+
+#### 1. 核心配置文件
+- **[flake.nix](flake.nix)**: 配置入口文件，定义 nixpkgs 和 home-manager 输入，支持 `vm-nixos` 主机配置
+- **[modules/common.nix](modules/common.nix)**: 通用系统配置，包含 SSH、网络、国际化、基础包等
+- **[home-manager/modules/common.nix](home-manager/modules/common.nix)**: 通用用户配置，包含基础包和环境变量
+
+#### 2. 用户配置
+- **[home-manager/users/modolet.nix](home-manager/users/modolet.nix)**: modolet 用户的完整配置，引用通用模块
+
+#### 3. 主机配置 (vm-nixos)
+- **[hosts/vm/hardware.nix](hosts/vm/hardware.nix)**: VMware 虚拟机硬件配置
+- **[hosts/vm/configuration.nix](hosts/vm/configuration.nix)**: 虚拟机系统配置，包含 EFI 启动、VMware tools 等
+- **[hosts/vm/home.nix](hosts/vm/home.nix)**: 虚拟机用户配置引用
+
+### 配置特性
+
+#### 1. SSH 认证配置
+- **Root 访问**: `PermitRootLogin yes` 允许 root 用户 SSH 登录
+- **密码认证**: `PasswordAuthentication true` 支持密码登录
+- **密钥认证**: 已配置 SSH 公钥认证，避免重复密码输入
+- **安全设置**: `PermitEmptyPasswords false` 禁止空密码
+
+#### 2. 启动配置
+- **EFI 支持**: GRUB 配置支持 EFI 启动 (`efiSupport = true`)
+- **设备配置**: `device = "nodev"` 适用于虚拟化环境
+
+#### 3. VMware 虚拟机支持
+- **VMware Guest**: 启用 VMware guest 增强功能
+- **Open VM Tools**: 安装并配置 `open-vm-tools` 包
+- **VMware 服务**: `vmware.service` 正常运行
+
+## 部署和维护流程
+
+### 1. 新设备部署流程
+以 VMware 虚拟机为例：
+1. **创建硬件配置**: `hosts/[主机名]/hardware.nix`
+2. **创建系统配置**: `hosts/[主机名]/configuration.nix`
+3. **创建用户配置**: `hosts/[主机名]/home.nix`
+4. **配置 SSH 认证**: 将 SSH 公钥添加到配置中
+5. **部署配置**: `nixos-rebuild switch --flake .#主机名`
+
+### 2. 配置更新流程
+1. **本地修改**: 在相应配置文件中进行更改
+2. **测试配置**: 使用 `nix flake check` 验证语法
+3. **部署更新**: `nixos-rebuild switch --flake .#主机名`
+4. **提交变更**: `git add . && git commit -m "描述变更" && git push`
+
+### 3. SSH 密钥管理
+1. **获取本地公钥**: `cat ~/.ssh/id_rsa.pub`
+2. **添加到配置**: 将公钥添加到 `users.users.root.openssh.authorizedKeys.keys`
+3. **配置到目标机**: 手动添加到目标机的 `~/.ssh/authorized_keys`
+4. **验证无密码登录**: 测试 SSH 连接
+
+## 文档维护策略
+
+### 1. 文档更新原则
+- **实时同步**: 每次重要配置变更后立即更新 CLAUDE.md
+- **结构一致性**: 确保文档结构与实际配置文件结构一致
+- **示例完整性**: 为每个模块和配置提供完整的使用示例
+
+### 2. 版本控制
+- **配置变更**: 所有配置变更都应在 CLAUDE.md 中记录
+- **流程更新**: 部署和维护流程的任何修改都应体现在文档中
+- **结构演进**: 目录结构的变化需要及时更新到文档中
+
+### 3. 文档自我引用
+本节内容本身就是对文档维护策略的实践，确保：
+- 每次更新 CLAUDE.md 时都记录此行为
+- 维护流程本身被文档化
+- 新的维护者能够理解如何保持文档的准确性
+
 ## 参考配置分析
 
 ### 1. Modolet/dotfiles - Neovim 配置参考
