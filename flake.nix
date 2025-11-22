@@ -21,6 +21,14 @@
       # nixpkgs 实例
       pkgs = nixpkgs.legacyPackages.${system};
 
+      # 库函数
+      lib = import ./lib { inherit pkgs; };
+
+      # 自定义 overlay
+      overlay = final: prev: {
+        # 可以在这里添加自定义包
+      };
+
     in {
       # NixOS 系统配置
       nixosConfigurations = {

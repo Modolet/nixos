@@ -7,7 +7,8 @@
 
   # 引入通用配置模块
   imports = [
-    ../modules/default.nix  # 包含 common.nix 和终端模块
+    ../modules/common.nix  # 包含通用配置
+    ../modules/terminal  # 终端模块
     ../modules/editors/neovim
   ];
 

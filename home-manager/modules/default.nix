@@ -1,9 +1,6 @@
-# home-manager 模块入口文件
-# home-manager modules entry point
-
 {
-  imports = [
-    ./common.nix
-    ./terminal
-  ];
+  monitors = import ./monitors.nix;
+  colorscheme = import ./colorscheme.nix;
+  wallpapers = import ./wallpaper.nix;
+  desktopShell = import ./desktop-shell.nix;
 }
