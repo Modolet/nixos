@@ -37,9 +37,7 @@
       # nixpkgs 实例
       pkgs = nixpkgs.legacyPackages.${system};
 
-      # 库函数
-      lib = import ./lib { inherit pkgs; };
-
+      
       # 自定义 overlay
       overlay = final: prev: {
         # Material Symbols

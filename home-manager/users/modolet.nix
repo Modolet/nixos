@@ -7,6 +7,7 @@
 
   # 引入通用配置模块
   imports = [
+    ../lib  # 导入自定义库函数到 config.lib
     ../modules/common.nix  # 包含通用配置
     ../modules/terminal  # 终端模块
     ../modules/editors/neovim
