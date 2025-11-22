@@ -1,18 +1,16 @@
 { config, ... }:
 {
   imports = [
-    ./wallpapers.nix
-    ./colorScheme.nix
+    ../../lib/wallpaper
+    ../../lib/colorScheme
     ./swhkd.nix
     ./misc.nix
   ];
 
-  # Export all library functions through config.lib
+  # The wallpaper and colorScheme modules will automatically extend config.lib with their functions
+  # We only need to manually define swhkd and misc
   config.lib = {
-    # These will be defined by the imported modules above
-    wallpapers = import ./wallpapers.nix { inherit config; };
-    colorScheme = import ./colorScheme.nix { inherit config; };
     swhkd = import ./swhkd.nix;
-    misc = import ./misc.nix;
+    misc = import ./misc.nix { inherit (config) lib; };
   };
 }
