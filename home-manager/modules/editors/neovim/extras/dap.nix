@@ -12,7 +12,7 @@ in {
         "nvim-dap-virtual-text"
         "nvim-nio"
       ];
-      lspServers = withPkgs [ "codelldb" ];
+      lspServers = withPkgs [ "lldb" ];
     };
 
     nlua = mkCategoryExtra "dap" {
