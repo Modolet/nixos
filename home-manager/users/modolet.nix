@@ -73,16 +73,21 @@
   };
 
   # 色彩方案配置
-  colorscheme = {
-    enable = true;
-    image = null;  # 可以后续设置壁纸图片
-  };
+  colorSchemes = [
+    {
+      name = "default-dark";
+      isDefault = true;
+      polarity = "dark";
+    }
+  ];
 
   # 壁纸配置
-  wallpapers = {
-    enable = true;
-    source = null;  # 可以后续设置壁纸来源
-  };
+  wallpapers = [
+    {
+      name = "default";
+      convertMethod = "none";
+    }
+  ];
 
   # 用户专属配置可以在这里添加
   # 例如特定的开发工具、主题配置等
