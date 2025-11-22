@@ -29,18 +29,13 @@
       flake = false;
     };
 
-    hugmetight-font = {
-      url = "github:EliverLara/HugMeTight";
-      flake = false;
-    };
-
     # Material Symbols 图标
     material-symbols.url = "github:googlefonts/material-symbols";
     material-symbols.flake = false;
   };
 
   # 输出定义
-  outputs = { self, nixpkgs, home-manager, nixvim, niri, stylix, swhkd, kose-font, hugmetight-font, material-symbols, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nixvim, niri, stylix, swhkd, kose-font, material-symbols, ... }@inputs:
     let
       # 系统架构
       system = "x86_64-linux";
@@ -56,10 +51,6 @@
         # 字体包
         kose-font = final.callPackage ./packages/kose-font.nix {
           src = kose-font;
-        };
-
-        hugmetight-font = final.callPackage ./packages/hugmetight-font.nix {
-          src = hugmetight-font;
         };
 
         # Material Symbols
