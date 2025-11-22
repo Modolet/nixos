@@ -55,8 +55,8 @@ in
       wallpapers = map getWallpaper cfg;
       wallpapersWithEffects = map applyEffects wallpapers;
       generatedWallpapers = map generateWallpaper wallpapersWithEffects;
-      normalWallpapers = map setWallpaper generatedWallpapers |> builtins.listToAttrs;
-      blurredWallpapers = map blurWallpaper generatedWallpapers |> builtins.listToAttrs;
+      normalWallpapers = builtins.listToAttrs (map setWallpaper generatedWallpapers);
+      blurredWallpapers = builtins.listToAttrs (map blurWallpaper generatedWallpapers);
     in
     {
       home.file = normalWallpapers // blurredWallpapers;
