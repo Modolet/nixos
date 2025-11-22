@@ -352,11 +352,83 @@ nixos/
 3. **提交变更**：`git commit -m "中文提交信息"`
 4. **推送到远程**：`git push`
 
-**提交信息规范**：
-- 使用中文描述变更内容
-- 简洁明了，突出主要变更
-- 不包含 AI 相关信息
-- 不包含自动生成的签名
+### 2. 提交信息规范
+
+#### 提交信息格式
+遵循 **类型(范围): 描述** 的格式，其中：
+- **类型**: 必需，表示变更的性质
+- **范围**: 可选，表示影响的功能模块或文件
+- **描述**: 必需，简洁明了的中文描述
+
+#### 类型 (Type) 定义
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| `feat` | 新功能 (feature) | `feat: 添加 modolet 用户配置` |
+| `fix` | 修复 bug | `fix: 修复 SSH 配置中的布尔值类型错误` |
+| `docs` | 文档更新 | `docs: 更新 CLAUDE.md 中的部署流程` |
+| `style` | 代码格式化（不影响功能） | `style: 统一配置文件缩进格式` |
+| `refactor` | 代码重构 | `refactor: 重构模块导入结构` |
+| `config` | 配置变更 | `config: 启用 VMware guest 工具` |
+| `init` | 初始化项目或模块 | `init: 创建虚拟机配置目录结构` |
+| `update` | 更新依赖或版本 | `update: 升级 NixOS 系统版本至 25.05` |
+| `remove` | 删除功能或文件 | `remove: 移除未使用的配置模块` |
+
+#### 范围 (Scope) 常见值
+- `vm-nixos`: 虚拟机相关配置
+- `ssh`: SSH 服务配置
+- `users`: 用户管理配置
+- `boot`: 启动加载器配置
+- `modules`: 通用模块配置
+- `home-manager`: home-manager 相关配置
+- `flake`: flake.nix 配置
+- `docs`: 文档文件
+
+#### 描述 (Description) 规则
+1. **使用中文**：所有描述使用简体中文
+2. **动词开头**：使用动词或动词短语开头
+3. **简洁明确**：不超过 50 个字符
+4. **突出重点**：说明变更的主要目的和效果
+5. **避免废话**：不要使用"本次"、"现在"等冗余词汇
+
+#### 提交信息示例
+
+**推荐的提交信息**：
+```bash
+git commit -m "feat(vm-nixos): 添加 EFI 启动配置和 SSH 密钥认证"
+git commit -m "fix(ssh): 修复密码认证配置中的布尔值类型错误"
+git commit -m "docs: 更新 CLAUDE.md 中的部署流程说明"
+git commit -m "config: 启用 VMware guest 增强功能"
+git commit -m "init: 创建 modolet 用户的 home-manager 配置"
+```
+
+**不推荐的提交信息**：
+```bash
+git commit -m "修改配置文件"           # 过于模糊
+git commit -m "update files"           # 未使用中文
+git commit -m "本次添加了新的功能"      # 包含冗余词汇
+git commit -m "fix: fix the bug"       # 重复描述
+git commit -m "feat: 添加了一些配置"    # 描述不够具体
+```
+
+#### 特殊情况处理
+
+**多相关变更**：
+当一次提交包含多个相关的变更时，使用概括性描述：
+```bash
+git commit -m "config(vm-nixos): 完成虚拟机基础配置部署"
+```
+
+**文档和代码同步更新**：
+当同时更新代码和文档时，使用 `docs` 类型：
+```bash
+git commit -m "docs: 记录当前实现状态和部署流程"
+```
+
+**临时或测试性提交**：
+在开发过程中，可以使用更简洁的描述，但仍需遵循基本规则：
+```bash
+git commit -m "test: 验证 VMware tools 安装"
+```
 
 ### 3. .gitignore 配置
 
