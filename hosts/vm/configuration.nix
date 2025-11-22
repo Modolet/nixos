@@ -9,6 +9,16 @@
   # 系统基础配置
   networking.hostName = "vm-nixos";
 
+  # 启动加载器配置 (EFI)
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true; # 启用EFI支持
+    device = "nodev"; # 无特定设备，EFI处理启动
+    version = 2;
+  };
+
+  boot.loader.efi.canTouchEfiVariables = true;
+
   # 用户管理
   users.users.modolet = {
     isNormalUser = true;
