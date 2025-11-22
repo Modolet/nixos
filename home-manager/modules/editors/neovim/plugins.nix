@@ -53,7 +53,7 @@ let
   # 导入各个分类的extras定义
   codingExtras = import ./extras/coding.nix { inherit pkgs helpers; };
   langExtras =
-    import ./extras/lang.nix { inherit pkgs helpers venv-selector-nvim; };
+    import ./extras/lang.nix { inherit pkgs helpers; };
   editorExtras = import ./extras/editor.nix { inherit pkgs helpers; };
   aiExtras = import ./extras/ai.nix { inherit pkgs helpers; };
   uiExtras = import ./extras/ui.nix { inherit pkgs helpers; };

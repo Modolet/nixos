@@ -1,4 +1,4 @@
-{ pkgs, helpers, venv-selector-nvim }:
+{ pkgs, helpers }:
 
 let inherit (helpers) mkLangExtra withVimPlugins withPkgs;
 in {
