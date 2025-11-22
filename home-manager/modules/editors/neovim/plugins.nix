@@ -82,7 +82,7 @@ let
   };
 
 in {
-  inherit basePlugins extrasDefinitions venv-selector-nvim;
+  inherit basePlugins extrasDefinitions;
 
   # 基础依赖包
   baseDeps = withPkgs [ "lua-language-server" "stylua" "ripgrep" ];
