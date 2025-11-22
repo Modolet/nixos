@@ -24,7 +24,7 @@
     isNormalUser = true;
     description = "modolet";
     extraGroups = [ "networkmanager" "wheel" "audio" "video" ];
-    shell = pkgs.bash;
+    shell = pkgs.nushell;
   };
 
   # 允许非自由软件

@@ -51,6 +51,12 @@
     };
   };
 
+  # 设置默认 shell 为 nushell
+  programs.nushell.enable = true;
+  home.sessionVariables = {
+    SHELL = "${pkgs.nushell}/bin/nu";
+  };
+
   # 用户专属配置可以在这里添加
   # 例如特定的开发工具、主题配置等
   programs.home-manager.enable = true;
