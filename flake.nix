@@ -34,6 +34,10 @@
                 useUserPackages = true;
                 useGlobalPkgs = true;
                 extraSpecialArgs = { inherit inputs; };
+
+                # 导入 nixvim 的 Home Manager 模块
+                sharedModules = [ nixvim.homeManagerModules.nixvim ];
+
                 users.modolet = {
                   imports = [
                     ./home-manager/users/modolet.nix
