@@ -5,10 +5,10 @@
     ./fonts.nix
     ./mako.nix
     ./niri
-    ./monitors.nix
-    ./colorscheme.nix
-    ./wallpaper.nix
-    ./desktop-shell.nix
+    ../monitors.nix
+    ../colorscheme.nix
+    ../wallpaper.nix
+    ../desktop-shell.nix
   ];
 
   home.packages = with pkgs; [
