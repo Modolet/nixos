@@ -4,7 +4,6 @@
     ../../lib/wallpaper
     ../../lib/colorScheme
     ./swhkd.nix
-    ./misc.nix
   ];
 
   # The wallpaper and colorScheme modules will automatically extend config.lib with their functions
