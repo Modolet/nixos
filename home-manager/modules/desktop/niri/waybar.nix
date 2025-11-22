@@ -196,9 +196,11 @@ in
       '';
     ".config/waybar/colors.css".text =
       # css
-      (builtins.mapAttrs (name: value: "@define-color ${name} ${value};") colors)
-      |> builtins.attrValues
-      |> builtins.concatStringsSep "\n";
+      builtins.concatStringsSep "\n" (
+        builtins.attrValues (
+          builtins.mapAttrs (name: value: "@define-color ${name} ${value};") colors
+        )
+      );
     ".config/waybar/tray.css".text =
       # css
       ''
