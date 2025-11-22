@@ -22,20 +22,10 @@
     # swhkd 快捷键守护进程
     swhkd.url = "github:waycrate/swhkd";
     swhkd.inputs.nixpkgs.follows = "nixpkgs";
-
-    # 字体包
-    kose-font = {
-      url = "github:Biro-Biro/Font-Kose";
-      flake = false;
-    };
-
-    # Material Symbols 图标
-    material-symbols.url = "github:googlefonts/material-symbols";
-    material-symbols.flake = false;
   };
 
   # 输出定义
-  outputs = { self, nixpkgs, home-manager, nixvim, niri, stylix, swhkd, kose-font, material-symbols, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nixvim, niri, stylix, swhkd, ... }@inputs:
     let
       # 系统架构
       system = "x86_64-linux";
@@ -48,16 +38,6 @@
 
       # 自定义 overlay
       overlay = final: prev: {
-        # 字体包
-        kose-font = final.callPackage ./packages/kose-font.nix {
-          src = kose-font;
-        };
-
-        # Material Symbols
-        material-symbols = final.callPackage ./packages/material-symbols.nix {
-          src = material-symbols;
-        };
-
         # Niri (unstable 版本)
         niri-unstable = niri.packages.${final.system}.niri;
 

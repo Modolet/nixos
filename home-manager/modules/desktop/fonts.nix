@@ -1,7 +1,6 @@
 { pkgs, lib, ... }:
 {
   home.packages = [
-    pkgs.kose-font
-    pkgs.material-symbols
+    # 使用系统内置字体，暂时不添加自定义字体
   ];
 }
