@@ -144,26 +144,27 @@ in
     ".config/waybar/config.jsonc".text =
       let
         otherMonitorsConfig =
-          map (
-            name:
-            # json
-            ''
-              {
-                "position": "top",
-                "layer": "top",
-                "output": "${name}",
-                "modules-left": [
-                  "niri/workspaces",
-                  "niri/window"
-                ],
-                "modules-right": [
-                  "tray",
-                  "group/meters"
-                ],
-                ${moduleConfiguration}
-              },
-            '') config.lib.monitors.otherMonitorsNames
-          |> builtins.concatStringsSep "\n";
+          builtins.concatStringsSep "\n" (
+            map (
+              name:
+              # json
+              ''
+                {
+                  "position": "top",
+                  "layer": "top",
+                  "output": "${name}",
+                  "modules-left": [
+                    "niri/workspaces",
+                    "niri/window"
+                  ],
+                  "modules-right": [
+                    "tray",
+                    "group/meters"
+                  ],
+                  ${moduleConfiguration}
+                },
+              '') config.lib.monitors.otherMonitorsNames
+          );
       in
       # json
       ''
