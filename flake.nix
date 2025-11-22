@@ -10,10 +10,37 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Niri Wayland 合成器
+    niri.url = "github:sodiboo/niri-flake";
+    niri.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Stylix 主题系统
+    stylix.url = "github:danth/stylix";
+    stylix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # swhkd 快捷键守护进程
+    swhkd.url = "github:waycrate/swhkd";
+    swhkd.inputs.nixpkgs.follows = "nixpkgs";
+
+    # 字体包
+    kose-font = {
+      url = "github:Biro-Biro/Font-Kose";
+      flake = false;
+    };
+
+    hugmetight-font = {
+      url = "github:EliverLara/HugMeTight";
+      flake = false;
+    };
+
+    # Material Symbols 图标
+    material-symbols.url = "github:googlefonts/material-symbols";
+    material-symbols.flake = false;
   };
 
   # 输出定义
-  outputs = { self, nixpkgs, home-manager, nixvim, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nixvim, niri, stylix, swhkd, kose-font, hugmetight-font, material-symbols, ... }@inputs:
     let
       # 系统架构
       system = "x86_64-linux";
@@ -26,7 +53,25 @@
 
       # 自定义 overlay
       overlay = final: prev: {
-        # 可以在这里添加自定义包
+        # 字体包
+        kose-font = final.callPackage ./packages/kose-font.nix {
+          src = kose-font;
+        };
+
+        hugmetight-font = final.callPackage ./packages/hugmetight-font.nix {
+          src = hugmetight-font;
+        };
+
+        # Material Symbols
+        material-symbols = final.callPackage ./packages/material-symbols.nix {
+          src = material-symbols;
+        };
+
+        # Niri (unstable 版本)
+        niri-unstable = niri.packages.${final.system}.niri;
+
+        # swhkd
+        swhkd = swhkd.packages.${final.system}.swhkd;
       };
 
     in {
@@ -35,6 +80,7 @@
         vm-nixos = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
+            { nixpkgs.overlays = [ overlay ]; }
             ./hosts/vm/configuration.nix
             home-manager.nixosModules.home-manager
             {
@@ -61,7 +107,10 @@
       # Home-manager 用户配置
       homeConfigurations = {
         modolet = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ overlay ];
+          };
           extraSpecialArgs = { inherit inputs; };
           modules = [
             nixvim.homeModules.nixvim

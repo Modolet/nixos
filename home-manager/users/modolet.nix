@@ -10,6 +10,7 @@
     ../modules/common.nix  # 包含通用配置
     ../modules/terminal  # 终端模块
     ../modules/editors/neovim
+    ../modules/desktop  # 桌面环境
   ];
 
   # 用户状态版本
@@ -56,6 +57,30 @@
   programs.nushell.enable = true;
   home.sessionVariables = {
     SHELL = "${pkgs.nushell}/bin/nu";
+  };
+
+  # 桌面环境配置
+  modules.desktop = {
+    enable = true;
+    shell = "waybar";  # 使用 waybar 作为桌面 shell
+  };
+
+  # 显示器配置
+  monitors = {
+    main = "eDP-1";
+    others = [ ];
+  };
+
+  # 色彩方案配置
+  colorscheme = {
+    enable = true;
+    image = null;  # 可以后续设置壁纸图片
+  };
+
+  # 壁纸配置
+  wallpaper = {
+    enable = true;
+    source = null;  # 可以后续设置壁纸来源
   };
 
   # 用户专属配置可以在这里添加

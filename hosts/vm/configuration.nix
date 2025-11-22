@@ -22,7 +22,7 @@
   users.users.modolet = {
     isNormalUser = true;
     description = "modolet";
-    extraGroups = [ "networkmanager" "wheel" "audio" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "video" "input" "uinput" ];
     shell = pkgs.nushell;
   };
 
@@ -38,6 +38,27 @@
   environment.systemPackages = with pkgs; [
     open-vm-tools    # VMware guest tools
   ];
+
+  # Wayland 支持
+  programs.xwayland.enable = true;
+  programs.hyprland = {
+    enable = false;  # 我们使用 Niri
+  };
+
+  # Power management
+  services.power-profiles-daemon.enable = true;
+
+  # D-Bus 服务
+  services.dbus.enable = true;
+
+  # Polkit (权限管理)
+  security.polkit.enable = true;
+
+  # 日志管理
+  services.journald.extraConfig = ''
+    Storage=volatile
+    SystemMaxUse=100M
+  '';
 
   # 系统版本
   system.stateVersion = "25.05";
