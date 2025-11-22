@@ -71,14 +71,13 @@ let
       else
         {
           path =
-            lib.attrsets.filterAttrs (_: v: v.enable == true) effects
-            |> lib.attrsets.foldlAttrs (
+            lib.attrsets.foldlAttrs (
               acc: effectName: effectOptions:
               applyEffect {
                 inherit name;
                 path = acc;
               } effectName effectOptions
-            ) path;
+            ) path (lib.attrsets.filterAttrs (_: v: v.enable == true) effects);
         }
     );
 
@@ -86,9 +85,9 @@ let
     wallpaper:
     let
       inherit (wallpaper) path convertMethod;
-      name = match "(.*)\\..*" wallpaper.name |> head;
+      name = head (match "(.*)\\..*" wallpaper.name);
       baseImageName = if wallpaper.baseImageName == null then name else wallpaper.baseImageName;
-      live = (toString path |> match ".*gif$") != null;
+      live = (match ".*gif$" (toString path)) != null;
       thisWallpaper = { inherit name path live; };
     in
     {
