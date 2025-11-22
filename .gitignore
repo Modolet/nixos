@@ -1,0 +1,52 @@
+# Nix build artifacts
+result
+result-*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Age encryption files (unencrypted)
+.age/
+*.age.dec
+
+# Home manager files
+home-manager-files/
+
+# NixOS system files
+/boot/
+/nix/store/
+
+# Logs
+*.log
+
+# Secrets directory (except .gitkeep)
+secrets/
+!secrets/.gitkeep
+
+# Cache directories
+cache/
+.ccache/
+
+# Virtual machine files
+*.qcow2
+*.img
+*.iso
+
+# Backup files
+*.bak
+*.backup
+
+# References directory (for study only)
+references/
