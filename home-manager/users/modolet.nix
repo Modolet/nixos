@@ -84,6 +84,9 @@
     }
   ];
 
+  # 桌面 shell 配置
+  desktopShell = "waybar";
+
   # 用户专属配置可以在这里添加
   # 例如特定的开发工具、主题配置等
   programs.home-manager.enable = true;

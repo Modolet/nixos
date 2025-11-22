@@ -70,7 +70,7 @@
                 # 导入 nixvim 和 stylix 的 Home Manager 模块
                 sharedModules = [
                   nixvim.homeModules.nixvim
-                  stylix.homeManagerModules.stylix
+                  stylix.homeModules.stylix
                 ];
 
                 users.modolet = {
@@ -95,7 +95,7 @@
           extraSpecialArgs = { inherit inputs; };
           modules = [
             nixvim.homeModules.nixvim
-            stylix.homeManagerModules.stylix
+            stylix.homeModules.stylix
             ./home-manager/users/modolet.nix
           ];
         };
