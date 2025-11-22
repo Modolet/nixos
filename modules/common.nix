@@ -1,0 +1,51 @@
+{ config, pkgs, lib, ... }:
+
+{
+  # 通用 NixOS 系统配置
+  # 这里包含所有主机都会使用的通用系统配置
+
+  # 基础系统配置
+  system.stateVersion = "24.11";
+
+  # 国际化
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "zh_CN.UTF-8";
+    LC_IDENTIFICATION = "zh_CN.UTF-8";
+    LC_MEASUREMENT = "zh_CN.UTF-8";
+    LC_MONETARY = "zh_CN.UTF-8";
+    LC_NAME = "zh_CN.UTF-8";
+    LC_NUMERIC = "zh_CN.UTF-8";
+    LC_PAPER = "zh_CN.UTF-8";
+    LC_TELEPHONE = "zh_CN.UTF-8";
+    LC_TIME = "zh_CN.UTF-8";
+  };
+
+  # 时区
+  time.timeZone = "Asia/Shanghai";
+
+  # 基础包
+  environment.systemPackages = with pkgs; [
+    # 基础工具
+    vim
+    nano
+    git
+    curl
+    wget
+    htop
+    tree
+    file
+    which
+  ];
+
+  # 基础服务
+  services.openssh.enable = true;
+
+  # 网络配置
+  networking.networkmanager.enable = lib.mkDefault true;
+
+  # 用户管理基础配置
+  users.users.root.openssh.authorizedKeys.keys = [
+    # 添加 root 用户的 SSH 公钥
+  ];
+}
