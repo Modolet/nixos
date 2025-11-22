@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  user,
   config,
   ...
 }:
@@ -37,9 +36,9 @@ let
         builtins.concatStringsSep "\n" (
           builtins.concatLists (
             builtins.map (monitor: [
-              "swww img --namespace background -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-file)\""
+              "swww img --namespace background -o ${monitor} \"/home/${config.home.username}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-file)\""
               "sleep 0.2"
-              "swww img --namespace backdrop -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-blurred-file)\""
+              "swww img --namespace backdrop -o ${monitor} \"/home/${config.home.username}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-blurred-file)\""
               "sleep 0.2"
             ]) (builtins.attrNames config.monitors)
           )
@@ -50,7 +49,7 @@ let
         if config.desktopShell == "caelestia" then
           # bash
           ''
-            caelestia wallpaper -f "/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${config.lib.monitors.mainMonitorName}-file)"
+            caelestia wallpaper -f "/home/${config.home.username}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${config.lib.monitors.mainMonitorName}-file)"
             caelestia scheme set -n dynamic -m dark
           ''
         else
@@ -62,7 +61,7 @@ let
     import subprocess
     import json
 
-    wallpapers_path = "/home/${user}/Pictures/Wallpapers/generated/"
+    wallpapers_path = "/home/${config.home.username}/Pictures/Wallpapers/generated/"
     events_of_interest = [
         "Workspace changed",
         "Workspace focused",
@@ -183,7 +182,7 @@ let
   '';
 in
 {
-  systemd.user.services.niri-blur-wallpaper = {
+  systemd.config.home.username.services.niri-blur-wallpaper = {
     Unit = {
       Description = "Niri Blur Wallpaper";
       After = [ "graphical-session.target" ];
@@ -201,7 +200,7 @@ in
   home.activation.restart-niri-blur-wallpaper =
     lib.hm.dag.entryAfter [ "reload-swhkd" ]
       # bash
-      ''run --quiet ${pkgs.systemd}/bin/systemctl --user restart niri-blur-wallpaper'';
+      ''run --quiet ${pkgs.systemd}/bin/systemctl --config.home.username restart niri-blur-wallpaper'';
   programs.niri.settings.spawn-at-startup = [
     { command = [ "${niri-autostart}/bin/niri-autostart" ]; }
     { command = [ "${pkgs.xwayland-satellite}/bin/xwayland-satellite" ]; }
