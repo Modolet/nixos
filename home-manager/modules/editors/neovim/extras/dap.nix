@@ -1,6 +1,6 @@
 { pkgs, helpers }:
 
-let inherit (helpers) mkCategoryExtra withVimPlugins;
+let inherit (helpers) mkCategoryExtra withVimPlugins withPkgs;
 in {
   dap = {
     core = mkCategoryExtra "dap" {
@@ -12,6 +12,7 @@ in {
         "nvim-dap-virtual-text"
         "nvim-nio"
       ];
+      lspServers = withPkgs [ "codelldb" ];
     };
 
     nlua = mkCategoryExtra "dap" {

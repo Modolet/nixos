@@ -21,7 +21,7 @@ in {
         "venv-selector-nvim"
         "nvim-dap"
       ] ;
-      lspServers = withPkgs [ "pyright" "black" "isort" ];
+      lspServers = withPkgs [ "pyright" "black" "isort" "ruff" ];
       grammars = [ "python" ];
     };
 
@@ -57,7 +57,7 @@ in {
     cmake = mkLangExtra {
       lang = "cmake";
       plugins = withVimPlugins [ "cmake-tools-nvim" ];
-      lspServers = withPkgs [ "cmake-language-server" ];
+      lspServers = withPkgs [ "cmake-language-server" "neocmakelsp" ];
       grammars = [ "cmake" ];
     };
 

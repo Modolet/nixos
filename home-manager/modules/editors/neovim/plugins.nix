@@ -85,7 +85,7 @@ in {
   inherit basePlugins extrasDefinitions;
 
   # 基础依赖包
-  baseDeps = withPkgs [ "lua-language-server" "stylua" "ripgrep" ];
+  baseDeps = withPkgs [ "lua-language-server" "stylua" "ripgrep" "tree-sitter" ];
   lazyDeps = withPkgs [ "curl" "git" "ripgrep" "fd" "lazygit" "fzf" ];
 
   # 基础语法高亮
