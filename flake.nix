@@ -67,11 +67,8 @@
                 useGlobalPkgs = true;
                 extraSpecialArgs = { inherit inputs; };
 
-                # 导入 nixvim 和 niri 的 Home Manager 模块
-                sharedModules = [
-                  nixvim.homeModules.nixvim
-                  niri.homeManagerModules.niri
-                ];
+                # 导入 nixvim 的 Home Manager 模块
+                sharedModules = [ nixvim.homeModules.nixvim ];
 
                 users.modolet = {
                   imports = [
@@ -95,7 +92,6 @@
           extraSpecialArgs = { inherit inputs; };
           modules = [
             nixvim.homeModules.nixvim
-            niri.homeManagerModules.niri
             ./home-manager/users/modolet.nix
           ];
         };

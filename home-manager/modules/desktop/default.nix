@@ -4,7 +4,7 @@
     ./tofi.nix
     ./fonts.nix
     ./mako.nix
-    ./niri
+    # ./niri  # Temporarily disabled - needs proper home-manager integration
     ../monitors.nix
     ../colorscheme.nix
     ../wallpaper.nix
