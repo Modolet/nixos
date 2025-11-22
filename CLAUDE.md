@@ -4,6 +4,12 @@
 
 本文档描述了一个模块化、可扩展的 NixOS 配置结构设计，支持多用户、多设备场景，使用 flake 和 home-manager 进行管理。
 
+## 系统版本
+
+**当前 NixOS 系统版本**：25.05
+
+所有配置文件中的 `system.stateVersion` 和 `home.stateVersion` 都应设置为 `25.05`，确保配置的一致性和兼容性。
+
 ## 设计原则
 
 ### 1. 模块化设计 (Modularity)

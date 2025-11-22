@@ -5,7 +5,7 @@
   # 这里包含所有用户都会使用的通用配置
 
   # 基础配置
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
 
   # 基础包
   home.packages = with pkgs; [

@@ -5,7 +5,7 @@
   # 这里包含所有主机都会使用的通用系统配置
 
   # 基础系统配置
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.05";
 
   # 国际化
   i18n.defaultLocale = "en_US.UTF-8";
