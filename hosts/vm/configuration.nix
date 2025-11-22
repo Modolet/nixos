@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports = [
@@ -42,17 +42,4 @@
 
   # 系统版本
   system.stateVersion = "25.05";
-
-  # 引入 home-manager
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    extraSpecialArgs = { inherit nixvim; };
-    users.modolet = {
-      imports = [
-        nixvim.homeModules.nixvim
-        ./home.nix
-      ];
-    };
-  };
 }

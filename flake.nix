@@ -3,8 +3,8 @@
 
   # 输入定义
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    home-manager.url = "github:nix-community/home-manager/release-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nixvim = {
       url = "github:nix-community/nixvim";
@@ -13,7 +13,7 @@
   };
 
   # 输出定义
-  outputs = { self, nixpkgs, home-manager, nixvim, ... }:
+  outputs = { self, nixpkgs, home-manager, nixvim, ... }@inputs:
     let
       # 系统架构
       system = "x86_64-linux";
@@ -29,10 +29,20 @@
           modules = [
             ./hosts/vm/configuration.nix
             home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useUserPackages = true;
+                useGlobalPkgs = true;
+                extraSpecialArgs = { inherit inputs; };
+                users.modolet = {
+                  imports = [
+                    ./home-manager/users/modolet.nix
+                  ];
+                };
+              };
+            }
           ];
-          specialArgs = {
-            inherit self nixvim;
-          };
+          specialArgs = { inherit inputs; };
         };
       };
 
@@ -40,7 +50,7 @@
       homeConfigurations = {
         modolet = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit nixvim; };
+          extraSpecialArgs = { inherit inputs; };
           modules = [
             nixvim.homeModules.nixvim
             ./home-manager/users/modolet.nix

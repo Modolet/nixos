@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   # 用户基础信息
@@ -14,8 +14,8 @@
   # 用户状态版本
   home.stateVersion = "25.05";
 
-  # 启用 Neovim 作为默认编辑器
-  programs.neovim-lazyvim = {
+  # 启用 Neovim 配置
+  modules.nvim = {
     enable = true;
     defaultEditor = true;
   };
