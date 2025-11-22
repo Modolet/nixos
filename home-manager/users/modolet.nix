@@ -60,12 +60,7 @@
     SHELL = "${pkgs.nushell}/bin/nu";
   };
 
-  # 桌面环境配置
-  modules.desktop = {
-    enable = true;
-    shell = "waybar";  # 使用 waybar 作为桌面 shell
-  };
-
+  
   # 显示器配置
   monitors = {
     main = "eDP-1";
