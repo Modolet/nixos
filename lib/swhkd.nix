@@ -33,14 +33,13 @@ let
           inherit key;
           command = "notify-send 'entering mode ${name}' && @enter ${name}";
         }
-      ) enterKeys
-      |> builtins.concatStringsSep "\n"
+      (builtins.concatStringsSep "\n" enterKeys)
     )
     + "\n"
     + ''
       mode ${name} ${swallowStr} ${oneoffStr}
     ''
-    + (map mkKeyBinding keyBindings |> builtins.concatStringsSep "\n")
+    + (builtins.concatStringsSep "\n" (map mkKeyBinding keyBindings))
     + "\n"
     + (
       map (
@@ -49,8 +48,7 @@ let
           inherit key;
           command = "notify-send 'exiting mode ${name}' && @escape";
         }
-      ) escapeKeys
-      |> builtins.concatStringsSep "\n"
+      (builtins.concatStringsSep "\n" escapeKeys)
     )
     + "\n"
     + ''
@@ -64,12 +62,11 @@ let
       modes ? [ ],
       extraConfig ? '''',
     }:
-    (
+    builtins.concatStringsSep "\n" (
       (map (file: "include ${file}") includes)
       ++ (map (key: "ignore ${key}") ignores)
       ++ (map mkKeyBinding keyBindings)
       ++ (map mkMode modes)
-      |> builtins.concatStringsSep "\n"
     )
     + extraConfig;
 in
