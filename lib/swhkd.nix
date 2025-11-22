@@ -26,30 +26,30 @@ let
       swallowStr = if swallow then "swallow" else "";
       oneoffStr = if oneoff then "oneoff" else "";
     in
-    (
+    (builtins.concatStringsSep "\n" (
       map (
         key:
         mkKeyBinding {
           inherit key;
           command = "notify-send 'entering mode ${name}' && @enter ${name}";
         }
-      (builtins.concatStringsSep "\n" enterKeys)
-    )
+      ) enterKeys
+    ))
     + "\n"
     + ''
       mode ${name} ${swallowStr} ${oneoffStr}
     ''
     + (builtins.concatStringsSep "\n" (map mkKeyBinding keyBindings))
     + "\n"
-    + (
+    + (builtins.concatStringsSep "\n" (
       map (
         key:
         mkKeyBinding {
           inherit key;
           command = "notify-send 'exiting mode ${name}' && @escape";
         }
-      (builtins.concatStringsSep "\n" escapeKeys)
-    )
+      ) escapeKeys
+    ))
     + "\n"
     + ''
       endmode
