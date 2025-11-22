@@ -143,6 +143,10 @@ in {
               enabled = false,  -- 禁用 lazy 管理，使用 nix 管理的版本
             },
             {
+              "nvim-treesitter/nvim-treesitter-textobjects",
+              enabled = false,  -- 禁用，与 Nix 管理的 treesitter 冲突
+            },
+            {
               dir = "${lazyPath}/vim-suda",
               name = "suda.vim",
               lazy = false
