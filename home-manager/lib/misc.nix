@@ -1,3 +1,4 @@
+{ lib }:
 {
   hexToRGBA = color:
     let
