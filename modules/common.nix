@@ -38,14 +38,27 @@
     which
   ];
 
-  # 基础服务
-  services.openssh.enable = true;
+  # SSH 服务配置
+  services.openssh = {
+    enable = true;
+    # 允许 root 用户通过 SSH 登录
+    settings.PermitRootLogin = "yes";
+    # 允许密码认证
+    settings.PasswordAuthentication = "yes";
+    # 允许空密码（仅在密码设置为空时有效）
+    settings.PermitEmptyPasswords = "no";
+    # 启用公钥认证
+    settings.PubkeyAuthentication = "yes";
+    # 开启 X11 转发（可选）
+    settings.X11Forwarding = "yes";
+  };
 
   # 网络配置
   networking.networkmanager.enable = lib.mkDefault true;
 
   # 用户管理基础配置
   users.users.root.openssh.authorizedKeys.keys = [
-    # 添加 root 用户的 SSH 公钥
+    # 添加 root 用户的 SSH 公钥（可选）
+    # "ssh-rsa your-public-key-here"
   ];
 }
