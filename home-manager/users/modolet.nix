@@ -8,15 +8,18 @@
   # 引入通用配置模块
   imports = [
     ../modules/common.nix
-    ../modules/editors/neovim
+    # 暂时禁用复杂的 neovim 模块进行测试
+    # ../modules/editors/neovim
   ];
 
   # 用户状态版本
   home.stateVersion = "25.05";
 
-  # 启用 Neovim 配置
-  modules.nvim = {
+  # 使用基础的 nixvim 配置进行测试
+  programs.nixvim = {
     enable = true;
+    defaultEditor = true;
+    vimAlias = true;
   };
 
   # 用户专属配置可以在这里添加

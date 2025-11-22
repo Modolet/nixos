@@ -28,7 +28,6 @@
           inherit system;
           modules = [
             ./hosts/vm/configuration.nix
-            nixvim.homeModules.nixvim
             home-manager.nixosModules.home-manager
             {
               home-manager = {
