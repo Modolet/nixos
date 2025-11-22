@@ -18,8 +18,9 @@ in {
         "mason-nvim-dap-nvim"
         "neotest"
         "nvim-cmp"
+        "venv-selector-nvim"
         "nvim-dap"
-      ] ++ [ venv-selector-nvim ];
+      ] ;
       lspServers = withPkgs [ "pyright" "black" "isort" ];
       grammars = [ "python" ];
     };
