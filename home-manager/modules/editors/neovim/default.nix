@@ -117,6 +117,7 @@ in {
       enableMan = false;
       withPython3 = false;
       withRuby = false;
+      withNodeJs = true;
       extraConfigLua = ''
         vim.opt.rtp:prepend("${pkgs.vimPlugins.lazy-nvim}")
         require("lazy").setup({
