@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   imports = [
     ../../lib/wallpaper
@@ -11,6 +11,6 @@
   # We only need to manually define swhkd and misc
   config.lib = {
     swhkd = import ./swhkd.nix;
-    misc = import ./misc.nix { inherit (config) lib; };
+    misc = import ./misc.nix { inherit lib; };
   };
 }
