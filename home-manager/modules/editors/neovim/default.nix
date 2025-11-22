@@ -85,16 +85,14 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # 注释掉内置 treesitter，让 lazy 管理
+    # xdg.configFile."nvim/parser".source = pkgs.linkFarm "treesitter-parsers" (map
+    #   (grammar: {
+    #     name = "${grammar}.so";
+    #     path = "${pkgs.vimPlugins.nvim-treesitter.builtGrammars.${grammar}}/parser";
+    #   }) allGrammars);
+
     xdg.configFile = lib.mkMerge [
-      {
-        "nvim/parser".source = pkgs.linkFarm "treesitter-parsers" (map
-          (grammar: {
-            name = "${grammar}.so";
-            path = "${
-                pkgs.vimPlugins.nvim-treesitter.builtGrammars.${grammar}
-              }/parser";
-          }) allGrammars);
-      }
       (lib.mkIf (cfg.configFiles.autocmds != null) {
         "nvim/lua/config/autocmds.lua".source = cfg.configFiles.autocmds;
       })
@@ -140,7 +138,7 @@ in {
             {
               "nvim-treesitter/nvim-treesitter",
               opts = function(_, opts)
-                opts.ensure_installed = {}
+                -- 让 LazyVim 管理 treesitter，但避免重复安装
                 return opts
               end
             },
