@@ -78,7 +78,7 @@
   };
 
   # 壁纸配置
-  wallpaper = {
+  wallpapers = {
     enable = true;
     source = null;  # 可以后续设置壁纸来源
   };
