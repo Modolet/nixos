@@ -80,6 +80,10 @@
   wallpapers = [
     {
       name = "default";
+      path = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/NixOS/nixos-artwork/master/wallpapers/nix-wallpaper-tiling-rainbow.png";
+        sha256 = "1n6p1z6z7l20qgmpfqd0j0q7yf6dzhj8a55q8871l5h8v4x0kl1";
+      };
       convertMethod = "none";
     }
   ];
