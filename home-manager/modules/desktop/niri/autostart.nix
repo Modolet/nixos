@@ -35,15 +35,16 @@ let
         wlsunset -s 00:00 -S 00:00 -t 5000 -T 5001 &
       ''
       + (
-        builtins.attrNames config.monitors
-        |> map (monitor: [
-          "swww img --namespace background -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-file)\""
-          "sleep 0.2"
-          "swww img --namespace backdrop -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-blurred-file)\""
-          "sleep 0.2"
-        ])
-        |> builtins.concatLists
-        |> builtins.concatStringsSep "\n"
+        builtins.concatStringsSep "\n" (
+          builtins.concatLists (
+            builtins.map (monitor: [
+              "swww img --namespace background -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-file)\""
+              "sleep 0.2"
+              "swww img --namespace backdrop -o ${monitor} \"/home/${user}/Pictures/Wallpapers/generated/$(cat ~/Pictures/Wallpapers/${monitor}-blurred-file)\""
+              "sleep 0.2"
+            ]) (builtins.attrNames config.monitors)
+          )
+        )
       )
       + "\n"
       + (
