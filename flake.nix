@@ -24,7 +24,7 @@
     swhkd.inputs.nixpkgs.follows = "nixpkgs";
 
     # Material Symbols 图标
-    material-symbols.url = "github:googlefonts/material-symbols";
+    material-symbols.url = "github:marella/material-icons";
     material-symbols.flake = false;
   };
 

@@ -5,10 +5,10 @@ stdenvNoCC.mkDerivation {
   version = "unstable-2023-11-22";
 
   src = fetchFromGitHub {
-    owner = "googlefonts";
-    repo = "material-symbols";
+    owner = "marella";
+    repo = "material-icons";
     rev = "main";
-    sha256 = "0a9b8c7d6e5f4g3h2i1j0k9l8m7n6o5p4q3r2s1t0u9v8w7x6y5z4a3b2c1d0e9";
+    sha256 = "1a9b8c7d6e5f4g3h2i1j0k9l8m7n6o5p4q3r2s1t0u9v8w7x6y5z4a3b2c1d0e9";
   };
 
   installPhase = ''
@@ -27,8 +27,8 @@ stdenvNoCC.mkDerivation {
   '';
 
   meta = {
-    description = "Material Symbols icons by Google";
-    homepage = "https://github.com/googlefonts/material-symbols";
+    description = "Material Design icons by Google";
+    homepage = "https://github.com/marella/material-icons";
     license = stdenvNoCC.lib.licenses.ofl;
     platforms = stdenvNoCC.lib.platforms.all;
   };
