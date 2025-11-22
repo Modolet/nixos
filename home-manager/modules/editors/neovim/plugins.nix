@@ -7,13 +7,13 @@ let
 
   # 自定义插件定义
   venv-selector-nvim = pkgs.vimUtils.buildVimPlugin {
-    pname = "venv-selector-nvim";
+    pname = "venv-selector.nvim";
     version = "2025-09-26";
     src = pkgs.fetchFromGitHub {
       owner = "linux-cultist";
       repo = "venv-selector.nvim";
-      rev = "regexp";
-      sha256 = "sha256-9fVH/EBbssmsUnZNxhxJC6d3sDImIqKtq5nFl/T8L7o=";
+      rev = "0b319f57c765701d5e7e073d05709c5d090df8ed";
+      sha256 = "sha256-U8AAYJNpVwJ4rc6WpqfTOv4iBFlVWTG3EK/iVP1PQQM=";
     };
     meta.homepage = "https://github.com/linux-cultist/venv-selector.nvim";
   };
