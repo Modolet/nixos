@@ -26,7 +26,7 @@
 
   # 环境变量
   home.sessionVariables = {
-    EDITOR = "nano";  # 临时使用，后续会被 neovim 配置覆盖
+    EDITOR = lib.mkDefault "nano";  # 使用 mkDefault 允许被其他配置覆盖
     BROWSER = "firefox";
   };
 
