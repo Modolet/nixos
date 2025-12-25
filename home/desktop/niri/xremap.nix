@@ -106,7 +106,7 @@ let
       "Super-e" = launchCmd "dolphin";
       "Super-c" = launchCmd "neovide";
       "Super-f" = launchCmd "firefox";
-      "Ctrl-Shift-Escape" = launchCmd "kitty -e htop";
+      "Ctrl-Shift-Esc" = launchCmd "kitty -e htop";
       "Super-a" = launchCmd rofiDrun;
       "Super-Shift-e" = launchCmd rofiFiles;
       "Super-v" = launchCmd "cliphist list | rofi -dmenu | cliphist decode | wl-copy";
