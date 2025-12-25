@@ -39,10 +39,10 @@ let
     "Super-Shift-R" = launchCmd "systemctl --user restart xremap.service";
     "Super-Alt-C" = launchCmd "wl-color-picker";
     "Super-b" = launchCmd barToggle;
-    "XF86AudioMute" = launchCmd "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-    "XF86AudioMicMute" = launchCmd "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-    "XF86AudioRaiseVolume" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+";
-    "XF86AudioLowerVolume" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
+    "Mute" = launchCmd "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+    "MicMute" = launchCmd "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+    "VolumeUp" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+";
+    "VolumeDown" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
     "Super-Shift-s" = launchCmd showKeysCmd;
     "Super-e" = launchCmd "hexecute";
   };
