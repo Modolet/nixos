@@ -48,6 +48,11 @@ let
 in
 {
   xdg.configFile."DankMaterialShell/stylix-colors.json".text = builtins.toJSON colorTheme;
+  xdg.configFile."DankMaterialShell/stylix-colors.json".onChange = ''
+    if command -v dms >/dev/null 2>&1; then
+      dms restart || true
+    fi
+  '';
   xdg.configFile."DankMaterialShell/settings.json".text = # json
     ''
       {
