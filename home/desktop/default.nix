@@ -42,103 +42,46 @@
       profile_dir="$user_nix_state_dir/profiles"
       global_profile="/nix/var/nix/profiles/per-user/$USER/home-manager"
 
-      current_profile=""
-      if [ -e "$profile_dir/home-manager" ]; then
-        current_profile="$profile_dir/home-manager"
-      elif [ -e "$hm_state_dir/gcroots/current-home" ]; then
-        current_profile="$hm_state_dir/gcroots/current-home"
-      elif [ -e "$global_profile" ]; then
-        current_profile="$global_profile"
-      fi
-
-      resolved_current=""
-      if [ -n "$current_profile" ]; then
-        resolved_current="$(readlink -f "$current_profile" 2>/dev/null || true)"
-      fi
-
-      specialisations_dir=""
-      base_dir=""
-      pick_latest_specialisations() {
-        if [ ! -d "$profile_dir" ]; then
-          return 1
-        fi
-        for num in $(ls "$profile_dir"/home-manager-*-link 2>/dev/null | sed 's#.*/home-manager-##; s#-link##' | sort -nr || true); do
-          candidate="$profile_dir/home-manager-$num-link"
-          target_link="$(readlink -f "$candidate" 2>/dev/null || true)"
-          if [ -n "$target_link" ] && [ -d "$target_link/specialisation" ]; then
-            if [ "$theme" = "default" ] || [ -x "$target_link/specialisation/$theme/activate" ]; then
-              base_dir="$target_link"
-              specialisations_dir="$target_link/specialisation"
-              return 0
-            fi
-          fi
-        done
-        return 1
-      }
-
-      if [ -n "$resolved_current" ] && [ -d "$resolved_current/specialisation" ]; then
-        base_dir="$resolved_current"
-        specialisations_dir="$resolved_current/specialisation"
-      else
-        pick_latest_specialisations || true
-      fi
-
-      if [ -z "$specialisations_dir" ]; then
-        specialisations_dir="$(ls -dt /nix/store/*home-manager-generation/specialisation 2>/dev/null | head -n 1 || true)"
-        if [ -n "$specialisations_dir" ]; then
-          base_dir="$(dirname "$specialisations_dir")"
-        fi
-      fi
-
-      target=""
-      if [ "$theme" = "default" ]; then
-        if [ -n "$base_dir" ]; then
-          target="$base_dir/activate"
-        elif [ -n "$current_profile" ]; then
-          target="$current_profile/activate"
-        fi
-      else
-        if [ -n "$specialisations_dir" ] && [ -x "$specialisations_dir/$theme/activate" ]; then
-          target="$specialisations_dir/$theme/activate"
-        fi
-      fi
-
-      if [ -n "$target" ] && [ "$theme" != "default" ]; then
-        target_gen="${target%/activate}"
-        if [ ! -e "$target_gen/home-files/.config/systemd/user/xremap.service" ]; then
-          target=""
-        fi
-      fi
-
-      if [ -z "$target" ] && [ "$theme" != "default" ]; then
-        best_target=""
-        best_score=-1
-        while IFS= read -r link; do
-          gen="$(readlink -f "$link" 2>/dev/null || true)"
-          [ -n "$gen" ] || continue
-
-          score=0
-          [ -e "$gen/home-files/.config/systemd/user/xremap.service" ] && score=$((score + 10))
-          [ -e "$gen/home-files/.config/niri/config.kdl" ] && score=$((score + 3))
-          [ -e "$gen/home-files/.config/DankMaterialShell/stylix-colors.json" ] && score=$((score + 2))
-
-          if [ "$score" -gt "$best_score" ]; then
-            best_score="$score"
-            best_target="$gen/activate"
-          fi
-        done < <(find /nix/store -maxdepth 3 -type l -path "*/specialisation/$theme" 2>/dev/null || true)
-
-        if [ "$best_score" -ge 0 ] && [ -n "$best_target" ]; then
-          target="$best_target"
-        fi
-      fi
-
-      if [ -z "$target" ]; then
-        echo "specialisation not found: $theme" >&2
+      if [ ! -d "$profile_dir" ]; then
+        echo "theme-switch: home-manager profile directory not found: $profile_dir" >&2
         exit 1
       fi
 
-      exec "$target" --driver-version 1
+      latest_num="$(
+        ls "$profile_dir"/home-manager-*-link 2>/dev/null \
+          | sed 's#.*/home-manager-##; s#-link##' \
+          | sort -nr \
+          | head -n 1 \
+          || true
+      )"
+      if [ -z "$latest_num" ]; then
+        echo "theme-switch: no home-manager generations found under: $profile_dir" >&2
+        exit 1
+      fi
+
+      base_dir="$(readlink -f "$profile_dir/home-manager-$latest_num-link" 2>/dev/null || true)"
+      if [ -z "$base_dir" ] || [ ! -d "$base_dir" ]; then
+        echo "theme-switch: failed to resolve latest generation: $profile_dir/home-manager-$latest_num-link" >&2
+        exit 1
+      fi
+
+      if [ ! -d "$base_dir/specialisation" ]; then
+        echo "theme-switch: latest generation has no specialisation dir: $base_dir" >&2
+        echo "theme-switch: please rebuild/switch home-manager so the latest generation includes specialisations" >&2
+        exit 1
+      fi
+
+      if [ "$theme" = "default" ]; then
+        exec "$base_dir/activate"
+      fi
+
+      if [ ! -x "$base_dir/specialisation/$theme/activate" ]; then
+        echo "specialisation not found in latest generation: $theme" >&2
+        exit 1
+      fi
+
+      "$base_dir/activate"
+      exec "$base_dir/specialisation/$theme/activate" --driver-version 1
     '')
   ];
 
