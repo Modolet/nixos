@@ -103,10 +103,33 @@
         fi
       fi
 
+      if [ -n "$target" ] && [ "$theme" != "default" ]; then
+        target_gen="${target%/activate}"
+        if [ ! -e "$target_gen/home-files/.config/systemd/user/xremap.service" ]; then
+          target=""
+        fi
+      fi
+
       if [ -z "$target" ] && [ "$theme" != "default" ]; then
-        fallback="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -name "$theme" 2>/dev/null | head -n 1 || true)"
-        if [ -n "$fallback" ]; then
-          target="$fallback/activate"
+        best_target=""
+        best_score=-1
+        while IFS= read -r link; do
+          gen="$(readlink -f "$link" 2>/dev/null || true)"
+          [ -n "$gen" ] || continue
+
+          score=0
+          [ -e "$gen/home-files/.config/systemd/user/xremap.service" ] && score=$((score + 10))
+          [ -e "$gen/home-files/.config/niri/config.kdl" ] && score=$((score + 3))
+          [ -e "$gen/home-files/.config/DankMaterialShell/stylix-colors.json" ] && score=$((score + 2))
+
+          if [ "$score" -gt "$best_score" ]; then
+            best_score="$score"
+            best_target="$gen/activate"
+          fi
+        done < <(find /nix/store -maxdepth 3 -type l -path "*/specialisation/$theme" 2>/dev/null || true)
+
+        if [ "$best_score" -ge 0 ] && [ -n "$best_target" ]; then
+          target="$best_target"
         fi
       fi
 
