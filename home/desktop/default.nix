@@ -42,32 +42,39 @@
       profile_dir="$user_nix_state_dir/profiles"
       global_profile="/nix/var/nix/profiles/per-user/$USER/home-manager"
 
-      if [ ! -d "$profile_dir" ]; then
-        echo "theme-switch: home-manager profile directory not found: $profile_dir" >&2
-        exit 1
+      current_profile=""
+      if [ -e "$profile_dir/home-manager" ]; then
+        current_profile="$profile_dir/home-manager"
+      elif [ -e "$hm_state_dir/gcroots/current-home" ]; then
+        current_profile="$hm_state_dir/gcroots/current-home"
+      elif [ -e "$global_profile" ]; then
+        current_profile="$global_profile"
       fi
 
-      latest_num="$(
-        ls "$profile_dir"/home-manager-*-link 2>/dev/null \
-          | sed 's#.*/home-manager-##; s#-link##' \
-          | sort -nr \
-          | head -n 1 \
-          || true
-      )"
-      if [ -z "$latest_num" ]; then
-        echo "theme-switch: no home-manager generations found under: $profile_dir" >&2
-        exit 1
+      resolved_current=""
+      if [ -n "$current_profile" ]; then
+        resolved_current="$(readlink -f "$current_profile" 2>/dev/null || true)"
       fi
 
-      base_dir="$(readlink -f "$profile_dir/home-manager-$latest_num-link" 2>/dev/null || true)"
-      if [ -z "$base_dir" ] || [ ! -d "$base_dir" ]; then
-        echo "theme-switch: failed to resolve latest generation: $profile_dir/home-manager-$latest_num-link" >&2
-        exit 1
+      base_dir=""
+      if [ -n "$resolved_current" ] && [ -d "$resolved_current/specialisation" ]; then
+        base_dir="$resolved_current"
+      elif [ -n "$resolved_current" ]; then
+        matches="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -lname "$resolved_current" -printf '%h\n' 2>/dev/null || true)"
+        if [ -n "$matches" ]; then
+          base_dir="$(printf '%s\n' "$matches" | sed 's#/specialisation$##' | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
+        fi
       fi
 
-      if [ ! -d "$base_dir/specialisation" ]; then
-        echo "theme-switch: latest generation has no specialisation dir: $base_dir" >&2
-        echo "theme-switch: please rebuild/switch home-manager so the latest generation includes specialisations" >&2
+      if [ -z "$base_dir" ]; then
+        specialisations_dir="$(ls -dt /nix/store/*home-manager-generation/specialisation 2>/dev/null | head -n 1 || true)"
+        if [ -n "$specialisations_dir" ]; then
+          base_dir="$(dirname "$specialisations_dir")"
+        fi
+      fi
+
+      if [ -z "$base_dir" ] || [ ! -x "$base_dir/activate" ]; then
+        echo "theme-switch: could not locate a usable home-manager generation" >&2
         exit 1
       fi
 
@@ -76,7 +83,7 @@
       fi
 
       if [ ! -x "$base_dir/specialisation/$theme/activate" ]; then
-        echo "specialisation not found in latest generation: $theme" >&2
+        echo "specialisation not found in base generation: $theme" >&2
         exit 1
       fi
 
