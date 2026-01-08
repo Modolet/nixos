@@ -70,6 +70,20 @@
       fi
 
       if [ -z "$specialisations_dir" ]; then
+        if [ -d "$profile_dir" ]; then
+          for num in $(ls "$profile_dir"/home-manager-*-link 2>/dev/null | sed 's#.*/home-manager-##; s#-link##' | sort -nr); do
+            candidate="$profile_dir/home-manager-${num}-link"
+            target_link="$(readlink -f "$candidate" || true)"
+            if [ -n "$target_link" ] && [ -d "$target_link/specialisation" ]; then
+              base_dir="$target_link"
+              specialisations_dir="$target_link/specialisation"
+              break
+            fi
+          done
+        fi
+      fi
+
+      if [ -z "$specialisations_dir" ]; then
         specialisations_dir="$(ls -dt /nix/store/*home-manager-generation/specialisation 2>/dev/null | head -n 1 || true)"
         if [ -n "$specialisations_dir" ]; then
           base_dir="$(dirname "$specialisations_dir")"
