@@ -51,36 +51,36 @@
         current_profile="$global_profile"
       fi
 
-      specialisations_dir=""
-      base_dir=""
+      resolved_current=""
       if [ -n "$current_profile" ]; then
-        current_profile="$(readlink -f "$current_profile")"
-        if [ -d "$current_profile/specialisation" ]; then
-          base_dir="$current_profile"
-          specialisations_dir="$current_profile/specialisation"
-        else
-          matches="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -lname "$current_profile" -printf '%h\n' 2>/dev/null || true)"
-          if [ -n "$matches" ]; then
-            base_dir="$(printf '%s\n' "$matches" | sed 's#/specialisation$##' | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
-            if [ -n "$base_dir" ] && [ -d "$base_dir/specialisation" ]; then
-              specialisations_dir="$base_dir/specialisation"
-            fi
-          fi
-        fi
+        resolved_current="$(readlink -f "$current_profile" 2>/dev/null || true)"
       fi
 
-      if [ -z "$specialisations_dir" ]; then
-        if [ -d "$profile_dir" ]; then
-          for num in $(ls "$profile_dir"/home-manager-*-link 2>/dev/null | sed 's#.*/home-manager-##; s#-link##' | sort -nr); do
-            candidate="$profile_dir/home-manager-$num-link"
-            target_link="$(readlink -f "$candidate" || true)"
-            if [ -n "$target_link" ] && [ -d "$target_link/specialisation" ]; then
+      specialisations_dir=""
+      base_dir=""
+      pick_latest_specialisations() {
+        if [ ! -d "$profile_dir" ]; then
+          return 1
+        fi
+        for num in $(ls "$profile_dir"/home-manager-*-link 2>/dev/null | sed 's#.*/home-manager-##; s#-link##' | sort -nr || true); do
+          candidate="$profile_dir/home-manager-$num-link"
+          target_link="$(readlink -f "$candidate" 2>/dev/null || true)"
+          if [ -n "$target_link" ] && [ -d "$target_link/specialisation" ]; then
+            if [ "$theme" = "default" ] || [ -x "$target_link/specialisation/$theme/activate" ]; then
               base_dir="$target_link"
               specialisations_dir="$target_link/specialisation"
-              break
+              return 0
             fi
-          done
-        fi
+          fi
+        done
+        return 1
+      }
+
+      if [ -n "$resolved_current" ] && [ -d "$resolved_current/specialisation" ]; then
+        base_dir="$resolved_current"
+        specialisations_dir="$resolved_current/specialisation"
+      else
+        pick_latest_specialisations || true
       fi
 
       if [ -z "$specialisations_dir" ]; then
