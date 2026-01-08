@@ -57,12 +57,24 @@
       fi
 
       base_dir=""
-      if [ -n "$resolved_current" ] && [ -d "$resolved_current/specialisation" ]; then
-        base_dir="$resolved_current"
-      elif [ -n "$resolved_current" ]; then
-        matches="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -lname "$resolved_current" -printf '%h\n' 2>/dev/null || true)"
-        if [ -n "$matches" ]; then
-          base_dir="$(printf '%s\n' "$matches" | sed 's#/specialisation$##' | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
+      hm_service="home-manager-$USER.service"
+      hm_execstart="$(
+        systemctl show -p ExecStart "$hm_service" --no-pager 2>/dev/null \
+          | sed -n 's/.*argv\\[\\]=\\([^;]*\\).*/\\1/p' \
+          || true
+      )"
+      if [ -n "$hm_execstart" ]; then
+        base_dir="$(printf '%s\n' "$hm_execstart" | awk '{print $NF}')"
+      fi
+
+      if [ -z "$base_dir" ]; then
+        if [ -n "$resolved_current" ] && [ -d "$resolved_current/specialisation" ]; then
+          base_dir="$resolved_current"
+        elif [ -n "$resolved_current" ]; then
+          matches="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -lname "$resolved_current" -printf '%h\n' 2>/dev/null || true)"
+          if [ -n "$matches" ]; then
+            base_dir="$(printf '%s\n' "$matches" | sed 's#/specialisation$##' | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
+          fi
         fi
       fi
 
@@ -87,7 +99,6 @@
         exit 1
       fi
 
-      "$base_dir/activate"
       exec "$base_dir/specialisation/$theme/activate" --driver-version 1
     '')
   ];
