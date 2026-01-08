@@ -58,13 +58,12 @@
 
       base_dir=""
       hm_service="home-manager-$USER.service"
-      hm_execstart="$(
-        systemctl show -p ExecStart "$hm_service" --no-pager 2>/dev/null \
-          | sed -n 's/.*argv\\[\\]=\\([^;]*\\).*/\\1/p' \
-          || true
-      )"
+      hm_execstart="$(systemctl show -p ExecStart "$hm_service" --no-pager 2>/dev/null || true)"
       if [ -n "$hm_execstart" ]; then
-        base_dir="$(printf '%s\n' "$hm_execstart" | awk '{print $NF}')"
+        base_dir="$(printf '%s\n' "$hm_execstart" | grep -oE '/nix/store/[^ ]+-home-manager-generation' | tail -n 1 || true)"
+        if [ -n "$base_dir" ] && [ ! -d "$base_dir" ]; then
+          base_dir=""
+        fi
       fi
 
       if [ -z "$base_dir" ]; then
