@@ -55,17 +55,24 @@
       base_dir=""
       if [ -n "$current_profile" ]; then
         current_profile="$(readlink -f "$current_profile")"
-        matches="$(find /nix/store/*home-manager-generation/ -lname "$current_profile" -printf '%h\n' 2>/dev/null || true)"
-        if [ -n "$matches" ]; then
-          base_dir="$(printf '%s\n' "$matches" | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
-          if [ -n "$base_dir" ] && [ -d "$base_dir/specialisation" ]; then
-            specialisations_dir="$base_dir/specialisation"
-          fi
-        elif [ -d "$current_profile/specialisation" ]; then
+        if [ -d "$current_profile/specialisation" ]; then
+          base_dir="$current_profile"
           specialisations_dir="$current_profile/specialisation"
-          base_dir="$current_profile"
         else
-          base_dir="$current_profile"
+          matches="$(find /nix/store/*home-manager-generation/specialisation -maxdepth 1 -type l -lname "$current_profile" -printf '%h\n' 2>/dev/null || true)"
+          if [ -n "$matches" ]; then
+            base_dir="$(printf '%s\n' "$matches" | sed 's#/specialisation$##' | sort -u | xargs ls -dt 2>/dev/null | head -n 1 || true)"
+            if [ -n "$base_dir" ] && [ -d "$base_dir/specialisation" ]; then
+              specialisations_dir="$base_dir/specialisation"
+            fi
+          fi
+        fi
+      fi
+
+      if [ -z "$specialisations_dir" ]; then
+        specialisations_dir="$(ls -dt /nix/store/*home-manager-generation/specialisation 2>/dev/null | head -n 1 || true)"
+        if [ -n "$specialisations_dir" ]; then
+          base_dir="$(dirname "$specialisations_dir")"
         fi
       fi
 
@@ -73,10 +80,12 @@
       if [ "$theme" = "default" ]; then
         if [ -n "$base_dir" ]; then
           target="$base_dir/activate"
+        elif [ -n "$current_profile" ]; then
+          target="$current_profile/activate"
         fi
       else
-        if [ -n "$base_dir" ] && [ -x "$base_dir/specialisation/$theme/activate" ]; then
-          target="$base_dir/specialisation/$theme/activate"
+        if [ -n "$specialisations_dir" ] && [ -x "$specialisations_dir/$theme/activate" ]; then
+          target="$specialisations_dir/$theme/activate"
         fi
       fi
 
