@@ -49,7 +49,10 @@ in
 {
   xdg.configFile."DankMaterialShell/stylix-colors.json".text = builtins.toJSON colorTheme;
   xdg.configFile."DankMaterialShell/stylix-colors.json".onChange = ''
-    if command -v dms >/dev/null 2>&1; then
+    dms_bin="/etc/profiles/per-user/$USER/bin/dms"
+    if [ -x "$dms_bin" ]; then
+      "$dms_bin" restart || true
+    elif command -v dms >/dev/null 2>&1; then
       dms restart || true
     fi
   '';
