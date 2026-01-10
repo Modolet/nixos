@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   inherit (config.lib.stylix) colors;
   colorTheme = {
@@ -45,18 +45,10 @@ let
       info = base0C;
     };
   };
-in
-{
-  xdg.configFile."DankMaterialShell/stylix-colors.json".text = builtins.toJSON colorTheme;
-  xdg.configFile."DankMaterialShell/stylix-colors.json".onChange = ''
-    dms_bin="/etc/profiles/per-user/$USER/bin/dms"
-    if [ -x "$dms_bin" ]; then
-      "$dms_bin" restart || true
-    elif command -v dms >/dev/null 2>&1; then
-      dms restart || true
-    fi
-  '';
-  xdg.configFile."DankMaterialShell/settings.json".text = # json
+
+  dmsSettingsStatePath = "${config.xdg.stateHome}/DankMaterialShell/settings.json";
+
+  defaultSettingsFile = builtins.toFile "dms-settings.json" # json
     ''
       {
         "currentThemeName": "custom",
@@ -228,6 +220,28 @@ in
         "animationSpeed": 2
       }
     '';
+in
+{
+  xdg.configFile."DankMaterialShell/stylix-colors.json" = {
+    text = builtins.toJSON colorTheme;
+    onChange = ''
+      if systemctl --user status dms.service >/dev/null 2>&1; then
+        systemctl --user restart dms.service
+      elif systemctl status dms.service >/dev/null 2>&1; then
+        systemctl restart dms.service
+      fi
+    '';
+  };
+
+  xdg.configFile."DankMaterialShell/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink dmsSettingsStatePath;
+
+  home.activation.ensureDmsSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f ${lib.escapeShellArg dmsSettingsStatePath} ]; then
+      install -Dm644 ${defaultSettingsFile} ${lib.escapeShellArg dmsSettingsStatePath}
+    fi
+  '';
+
   home.sessionVariables = {
     DMS_DISABLE_MATUGEN = "1";
   };
