@@ -1,5 +1,32 @@
-{ pkgs, lib, ... }:
-{
+{ pkgs, lib, config, ... }:
+let
+  themeSpecFile = "${config.xdg.stateHome}/theme-switch/spec";
+  themeSwitchRestore = pkgs.writeShellApplication {
+    name = "theme-switch-restore";
+    text = ''
+      set -euo pipefail
+
+      spec_file=${lib.escapeShellArg themeSpecFile}
+      if [ ! -f "$spec_file" ]; then
+        exit 0
+      fi
+
+      saved_theme="$(tr -d '[:space:]' < "$spec_file" || true)"
+      if [ -z "$saved_theme" ]; then
+        exit 0
+      fi
+
+      if ! command -v theme-switch >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      if ! theme-switch "$saved_theme"; then
+        printf 'theme-switch-restore: failed to load saved theme "%s", falling back to default\n' "$saved_theme" >&2
+        theme-switch default || true
+      fi
+    '';
+  };
+in {
   imports = [
     ./niri
     ./browser/firefox.nix
@@ -14,6 +41,7 @@
     xwayland-satellite
     swww
     swaybg
+    themeSwitchRestore
     (writeShellScriptBin "theme-switch" ''
       set -euo pipefail
 
@@ -35,6 +63,11 @@
           exit 1
           ;;
       esac
+
+      spec_file=${lib.escapeShellArg themeSpecFile}
+      spec_dir="$(dirname "$spec_file")"
+      mkdir -p "$spec_dir"
+      printf '%s\n' "$theme" > "$spec_file"
 
       state_home="''${XDG_STATE_HOME:-$HOME/.local/state}"
       user_nix_state_dir="$state_home/nix"
@@ -101,6 +134,19 @@
       exec "$base_dir/specialisation/$theme/activate" --driver-version 1
     '')
   ];
+
+  systemd.user.services.theme-switch-restore = {
+    Unit = {
+      Description = "Restore theme-switch specialisation on login";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${themeSwitchRestore}/bin/theme-switch-restore";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 
   qt = {
     enable = true;
