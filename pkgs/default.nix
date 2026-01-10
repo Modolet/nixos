@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  overlays = import ./overlays;
+  overlays = import ./overlays { inherit inputs; };
   packages = import ./packages.nix;
 in
 {

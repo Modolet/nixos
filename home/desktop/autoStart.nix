@@ -9,7 +9,6 @@ let
       set -euo pipefail
 
       systemctl --user restart xremap.service || true
-      fcitx5 -d -r &
     '';
 
   };
