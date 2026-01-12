@@ -352,7 +352,8 @@ let
 
         if [ ! -f "$cached_file" ]; then
           mkdir -p "$cache_dir"
-          cp "$source" "$cached_file"
+          install -m 0644 "$source" "$cached_file"
+          chmod u+w "$cached_file" 2>/dev/null || true
           ${pythonRecolor}/bin/python ${lib.escapeShellArg recolorScript} $smooth_arg --palette "$palette" --src "$cache_dir" >/dev/null
         fi
 
