@@ -35,6 +35,7 @@ in {
     ./terminal/kitty.nix
     ./dms.nix
     ./fcitx5.nix
+    ./wallpaper.nix
   ];
 
   home.packages = with pkgs; [
@@ -46,28 +47,17 @@ in {
       set -euo pipefail
 
       default_theme="default"
+      show_help=0
       if [ $# -eq 0 ]; then
         theme="$default_theme"
       else
         if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-          echo "usage: theme-switch [default|gruvbox|nord|tokyonight|onedark|catppuccin|dracula|solarized-dark|solarized-light]"
-          exit 0
+          show_help=1
+          theme="$default_theme"
+        else
+          theme="$1"
         fi
-        theme="$1"
       fi
-      case "$theme" in
-        default|gruvbox|nord|tokyonight|onedark|catppuccin|dracula|solarized-dark|solarized-light)
-          ;;
-        *)
-          echo "unknown theme: $theme" >&2
-          exit 1
-          ;;
-      esac
-
-      spec_file=${lib.escapeShellArg themeSpecFile}
-      spec_dir="$(dirname "$spec_file")"
-      mkdir -p "$spec_dir"
-      printf '%s\n' "$theme" > "$spec_file"
 
       state_home="''${XDG_STATE_HOME:-$HOME/.local/state}"
       user_nix_state_dir="$state_home/nix"
@@ -122,13 +112,27 @@ in {
         exit 1
       fi
 
-      if [ "$theme" = "default" ]; then
-        exec "$base_dir/activate"
+      if [ "$show_help" -eq 1 ]; then
+        echo "usage: theme-switch [default|<specialisation>]"
+        if [ -d "$base_dir/specialisation" ]; then
+          echo "available:"
+          ls -1 "$base_dir/specialisation" 2>/dev/null || true
+        fi
+        exit 0
       fi
 
-      if [ ! -x "$base_dir/specialisation/$theme/activate" ]; then
-        echo "specialisation not found in base generation: $theme" >&2
+      if [ "$theme" != "default" ] && [ ! -x "$base_dir/specialisation/$theme/activate" ]; then
+        echo "unknown theme: $theme" >&2
         exit 1
+      fi
+
+      spec_file=${lib.escapeShellArg themeSpecFile}
+      spec_dir="$(dirname "$spec_file")"
+      mkdir -p "$spec_dir"
+      printf '%s\n' "$theme" > "$spec_file"
+
+      if [ "$theme" = "default" ]; then
+        exec "$base_dir/activate"
       fi
 
       exec "$base_dir/specialisation/$theme/activate" --driver-version 1

@@ -795,7 +795,12 @@ def main():
     parser.add_argument("--src", type=str)
     parser.add_argument("--monochrome", type=list_of_strings)
     parser.add_argument("--palette", type=list_of_strings)
-    parser.add_argument("--smooth", type=bool, default=True)
+    parser.add_argument(
+        "--smooth",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Whether to smooth palette quantization for raster images.",
+    )
 
     args = parser.parse_args()
 

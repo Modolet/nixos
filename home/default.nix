@@ -31,6 +31,9 @@
       };
     };
   };
+  modules.wallpaper = {
+    enable = true;
+  };
   programs = {
     home-manager.enable = true;
   };

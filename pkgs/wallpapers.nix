@@ -101,4 +101,5 @@ stdenvNoCC.mkDerivation {
   meta = {
     description = "My wallpapers";
   };
+  passthru.wallpaperNames = map (wallpaper: wallpaper.name) wallpapers;
 }
