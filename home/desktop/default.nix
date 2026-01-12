@@ -148,6 +148,7 @@ in {
     Service = {
       Type = "oneshot";
       ExecStart = "${themeSwitchRestore}/bin/theme-switch-restore";
+      ExecStartPost = "${pkgs.systemd}/bin/systemctl --user start --no-block wallpaper-apply.service";
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };

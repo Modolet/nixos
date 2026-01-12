@@ -11,6 +11,7 @@
     lxgw-wenkai
     apple-fonts
     maple-mono-variable
+    maple-mono.NF-CN
   ];
   fonts.fontDir.enable = true;
 }
