@@ -349,12 +349,14 @@ let
 
         cache_dir="$cache_root/recolor/$palette_hash/$name"
         cached_file="$cache_dir/$name"
+        done_file="$cache_dir/.done"
 
-        if [ ! -f "$cached_file" ]; then
+        if [ ! -f "$done_file" ]; then
           mkdir -p "$cache_dir"
           install -m 0644 "$source" "$cached_file"
           chmod u+w "$cached_file" 2>/dev/null || true
           ${pythonRecolor}/bin/python ${lib.escapeShellArg recolorScript} $smooth_arg --palette "$palette" --src "$cache_dir" >/dev/null
+          touch "$done_file"
         fi
 
         printf '%s\n' "$cached_file"
