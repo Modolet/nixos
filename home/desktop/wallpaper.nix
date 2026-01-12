@@ -339,7 +339,7 @@ let
           exit 1
         fi
 
-        palette="$(jq -r '[.base00,.base01,.base02,.base03,.base04,.base05,.base06,.base07,.base08,.base09,.base0A,.base0B,.base0C,.base0D,.base0E,.base0F] | join(\",\")' "$palette_file")"
+        palette="$(jq -r '[.base00,.base01,.base02,.base03,.base04,.base05,.base06,.base07,.base08,.base09,.base0A,.base0B,.base0C,.base0D,.base0E,.base0F] | join(",")' "$palette_file")"
         palette_hash="$(sha256sum "$palette_file" | awk '{print $1}')"
         smooth_flag="$(jq -r '.recolor.smooth // true' "$config_file")"
         smooth_arg=""
@@ -691,7 +691,6 @@ in
         After = [
           "graphical-session.target"
           "swww-daemon.service"
-          "theme-switch-restore.service"
         ];
         Wants = [ "swww-daemon.service" ];
       };
