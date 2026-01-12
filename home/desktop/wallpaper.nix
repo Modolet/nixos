@@ -711,7 +711,7 @@ in
 
     home.activation.wallpaperApply = lib.hm.dag.entryAfter [ "writeBoundary" "wallpaperMonetMap" ] ''
       if command -v systemctl >/dev/null 2>&1; then
-        systemctl --user start wallpaper-apply.service >/dev/null 2>&1 || true
+        systemctl --user start --no-block wallpaper-apply.service >/dev/null 2>&1 || true
       else
         ${wallpaperScript}/bin/wallpaper apply >/dev/null 2>&1 || true
       fi
