@@ -7,6 +7,7 @@
     ./desktop
     ./ai
     ./lib
+    ./im
   ];
 
   modules.nvim = {
