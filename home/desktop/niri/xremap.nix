@@ -48,7 +48,7 @@ let
     "VolumeUp" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+";
     "VolumeDown" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
     "Super-Shift-s" = launchCmd showKeysCmd;
-    "Super-e" = launchCmd "hexecute";
+    "Super-e" = launchCmd "nautilus";
   };
   dmsRemap = {
     "Super-a" = launchCmd "dms ipc call spotlight toggle";

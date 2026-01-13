@@ -50,6 +50,7 @@ in
 {
   imports = [
     ./niri
+    ./pkgs.nix
     ./browser/firefox.nix
     ./desktopShell.nix
     ./autoStart.nix

@@ -33,6 +33,29 @@
           }
         ];
       };
+      togo = nixosSystem {
+        inherit specialArgs;
+        modules = [
+          ./togo
+          ../system
+          ../system/desktop
+          inputs.stylix.nixosModules.stylix
+          {
+            home-manager = {
+              users.modolet.imports = with inputs; [
+                dankMaterialShell.homeModules.dank-material-shell
+                dankMaterialShell.homeModules.niri
+                niri.homeModules.niri
+                stylix.homeModules.stylix
+                nixvim.homeModules.nixvim
+                ./togo/monitors.nix
+                ../home
+              ];
+              extraSpecialArgs = specialArgs;
+            };
+          }
+        ];
+      };
     };
 
 }
