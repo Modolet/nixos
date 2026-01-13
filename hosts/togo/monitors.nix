@@ -1,0 +1,19 @@
+{
+  monitors = {
+    "DP-1" = {
+      isMain = true;
+      scale = 1.75;
+      mode = {
+        width = 3840;
+        height = 2160;
+        refresh = 170.0;
+      };
+      position = {
+        x = 0;
+        y = 0;
+      };
+      rotation = 0;
+      focus-at-startup = true;
+    };
+  };
+}
