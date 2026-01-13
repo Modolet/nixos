@@ -6,6 +6,19 @@
 }:
 let
   themeSpecFile = "${config.xdg.stateHome}/theme-switch/spec";
+  # Keep HM specialisation data first so icon theme follows theme-switch.
+  hmDataDir = "${config.xdg.stateHome}/home-manager/gcroots/current-home/home-path/share";
+  xdgDataDirs = lib.concatStringsSep ":" [
+    hmDataDir
+    "${config.xdg.dataHome}/flatpak/exports/share"
+    "/var/lib/flatpak/exports/share"
+    "${config.home.homeDirectory}/.nix-profile/share"
+    "/nix/profile/share"
+    "${config.xdg.stateHome}/nix/profile/share"
+    "/etc/profiles/per-user/${config.home.username}/share"
+    "/nix/var/nix/profiles/default/share"
+    "/run/current-system/sw/share"
+  ];
   themeSwitchRestore = pkgs.writeShellApplication {
     name = "theme-switch-restore";
     text = ''
@@ -146,6 +159,10 @@ in
       exec "$base_dir/specialisation/$theme/activate" --driver-version 1
     '')
   ];
+
+  home.sessionVariables = {
+    XDG_DATA_DIRS = xdgDataDirs;
+  };
 
   systemd.user.services.theme-switch-restore = {
     Unit = {
