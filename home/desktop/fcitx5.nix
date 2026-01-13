@@ -13,17 +13,11 @@ with config.lib.stylix.colors;
       ];
       waylandFrontend = true;
     };
+
   };
-  # home = {
-  #   file.".local/share/fcitx5/rime/default.custom.yaml".text = ''
-  #     patch:
-  #         __include: rime_ice_suggestion:/
-  #         menu/page_size: 9
-  #         key_binder/bindings:
-  #             - { when: paging, accept: bracketleft, send: Page_Up }
-  #             - { when: paging, accept: bracketright, send: Page_Down }
-  #   '';
-  # };
+  home.sessionVariables = {
+    QT_IM_MODULE = "fcitx";
+  };
   xdg.dataFile."fcitx5/rime/default.custom.yaml".text = ''
     patch:
         __include: rime_ice_suggestion:/
