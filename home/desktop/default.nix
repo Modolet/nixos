@@ -1,10 +1,17 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   themeSpecFile = "${config.xdg.stateHome}/theme-switch/spec";
   themeSwitchRestore = pkgs.writeShellApplication {
     name = "theme-switch-restore";
     text = ''
       set -euo pipefail
+      dms restart
+      dms restart
 
       spec_file=${lib.escapeShellArg themeSpecFile}
       if [ ! -f "$spec_file" ]; then
@@ -26,7 +33,8 @@ let
       fi
     '';
   };
-in {
+in
+{
   imports = [
     ./niri
     ./browser/firefox.nix

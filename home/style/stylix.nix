@@ -1,32 +1,44 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   stylixColors = config.lib.stylix.colors.withHashtag;
-  palette =
-    [
-      stylixColors.base00
-      stylixColors.base01
-      stylixColors.base02
-      stylixColors.base03
-      stylixColors.base04
-      stylixColors.base05
-      stylixColors.base06
-      stylixColors.base07
-      stylixColors.base08
-      stylixColors.base09
-      stylixColors.base0A
-      stylixColors.base0B
-      stylixColors.base0C
-      stylixColors.base0D
-      stylixColors.base0E
-      stylixColors.base0F
-    ];
+  palette = [
+    stylixColors.base00
+    stylixColors.base01
+    stylixColors.base02
+    stylixColors.base03
+    stylixColors.base04
+    stylixColors.base05
+    stylixColors.base06
+    stylixColors.base07
+    stylixColors.base08
+    stylixColors.base09
+    stylixColors.base0A
+    stylixColors.base0B
+    stylixColors.base0C
+    stylixColors.base0D
+    stylixColors.base0E
+    stylixColors.base0F
+  ];
   paletteArg = lib.concatStringsSep "," palette;
   recolorScript = ''
-    ${pkgs.python3.withPackages (ps: with ps; [ pillow tqdm ])}/bin/python ${../../tools/icon-recolor.py} \
+    ${
+      pkgs.python3.withPackages (
+        ps: with ps; [
+          pillow
+          tqdm
+        ]
+      )
+    }/bin/python ${../../tools/icon-recolor.py} \
       --palette '${paletteArg}' \
       --src "$out/share/icons"
   '';
-in {
+in
+{
   stylix = {
     enable = true;
     autoEnable = false;
@@ -34,6 +46,9 @@ in {
     targets = {
       gtk.enable = true;
       gtk.flatpakSupport.enable = true;
+      lazygit.enable = true;
+      vscode.enable = true;
+
       qt = {
         enable = true;
         # platform = "gnome";
