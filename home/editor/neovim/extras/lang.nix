@@ -44,7 +44,7 @@ in {
       lang = "json";
       plugins = withVimPlugins [ "SchemaStore-nvim" ];
       lspServers = withPkgs [ "vscode-langservers-extracted" ];
-      grammars = [ "json" "json5" "jsonc" ];
+      grammars = [ "json" "json5"];
     };
 
     clangd = mkLangExtra {

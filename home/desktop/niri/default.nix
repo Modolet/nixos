@@ -15,6 +15,7 @@
 
   programs.niri = {
     enable = true;
+    package = pkgs.niri;
     settings =
       with config.lib.stylix.colors.withHashtag;
       let
