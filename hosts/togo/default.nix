@@ -26,17 +26,11 @@ _: {
   };
 
   services.xserver.videoDrivers = [
-    "modesetting"
-    "intel"
-    "amdgpu"
     "nvidia"
   ];
 
-  hardware.cpu.intel.updateMicrocode = true;
   hardware.cpu.amd.updateMicrocode = true;
   hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement.enable = true;
     open = true;
   };
 }
