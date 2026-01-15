@@ -390,13 +390,13 @@ let
           radius_value="$radius"
         fi
 
-        blur_param="0x${sigma}"
+        blur_param="0x$sigma"
         if [ "$radius_value" != "auto" ]; then
-          blur_param="${radius_value}x${sigma}"
+          blur_param="$radius_value"x"$sigma"
         fi
 
         hash="$(sha256sum "$source" | awk '{print $1}')"
-        cache_dir="$cache_root/blur/${hash}-${radius_value}-${sigma}"
+        cache_dir="$cache_root/blur/$hash-$radius_value-$sigma"
         blurred_file="$cache_dir/$name"
         done_file="$cache_dir/.done"
 
@@ -410,7 +410,7 @@ let
       }
 
       apply_wallpaper() {
-        local apply_blur="${1:-0}"
+        local apply_blur="''${1:-0}"
         read_state
 
         local state_changed=0
