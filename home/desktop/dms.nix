@@ -225,13 +225,10 @@ in
 {
   xdg.configFile."DankMaterialShell/stylix-colors.json" = {
     text = builtins.toJSON colorTheme;
-    onChange = ''
-      if systemctl --user status dms.service >/dev/null 2>&1; then
-        systemctl --user restart dms.service
-      elif systemctl status dms.service >/dev/null 2>&1; then
-        systemctl restart dms.service
-      fi
-    '';
+    # onChange = ''
+    #   dms restart
+    #   dms restart
+    # '';
   };
 
   xdg.configFile."DankMaterialShell/settings.json".source =

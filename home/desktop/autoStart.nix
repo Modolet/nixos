@@ -7,7 +7,6 @@ let
     bashOptions = [ ];
     text = ''
       set -euo pipefail
-
       systemctl --user restart xremap.service || true
     '';
 

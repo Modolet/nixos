@@ -71,7 +71,7 @@ in
       emoji.name = "Noto Color Emoji";
       emoji.package = pkgs.noto-fonts-color-emoji;
     };
-    iconTheme = {
+    icon = {
       enable = true;
       package = pkgs.zafiro-icons.overrideAttrs (oldAttrs: {
         postInstall = recolorScript + (oldAttrs.postInstall or "");
