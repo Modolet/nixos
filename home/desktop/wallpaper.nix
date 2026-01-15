@@ -567,7 +567,7 @@ let
           esac
           ;;
         apply)
-          local apply_blur=0
+          apply_blur=0
           if [ $# -ge 2 ]; then
             case "$2" in
               --blur)
