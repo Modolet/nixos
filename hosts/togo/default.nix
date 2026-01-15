@@ -2,6 +2,12 @@
 {
   imports = [
     ./hardware-configuration.nix
+    "${
+      builtins.fetchGit {
+        url = "https://github.com/NixOS/nixos-hardware.git";
+        rev = "efe2094529d69a3f54892771b6be8ee4a0ebef0f";
+      }
+    }/common/wifi/mediatek/mt7925"
   ];
 
   networking.hostName = "nixos_to_go";

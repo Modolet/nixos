@@ -34,6 +34,10 @@
     };
 
     blueman.enable = true;
+
+    udisks2.enable = true;
+    gvfs.enable = true;
   };
   programs.dconf.enable = true;
+
 }

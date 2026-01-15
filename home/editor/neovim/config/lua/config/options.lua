@@ -10,7 +10,7 @@ opt.spell = false
 vim.g.ai_cmp = false
 
 if vim.g.neovide then
-	vim.o.guifont = "FiraCode Nerd Font Mono:h12"
+	vim.o.guifont = "Maple Mono NF CN:h12"
 	vim.g.neovide_window_blurred = true
 	vim.g.neovide_floating_shadow = true
 	vim.g.neovide_floating_z_height = 10

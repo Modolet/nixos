@@ -58,6 +58,7 @@ in
     ./dms.nix
     ./fcitx5.nix
     ./wallpaper.nix
+    ./makemehappy
   ];
 
   home.packages = with pkgs; [

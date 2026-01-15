@@ -1,6 +1,6 @@
 {
   monitors = {
-    "DP-1" = {
+    "DP-3" = {
       isMain = true;
       scale = 1.75;
       mode = {

@@ -82,6 +82,14 @@
             }
             {
               matches = [
+                { title = "musicfox"; }
+              ];
+              default-column-width = {
+                proportion = 0.35;
+              };
+            }
+            {
+              matches = [
                 { is-focused = true; }
               ];
               opacity = 0.95;
@@ -90,7 +98,7 @@
               matches = [
                 { is-focused = false; }
               ];
-              opacity = 0.85;
+              opacity = 0.90;
             }
             {
               matches = [

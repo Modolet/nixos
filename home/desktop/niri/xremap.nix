@@ -48,7 +48,7 @@ let
     "VolumeUp" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+";
     "VolumeDown" = launchCmd "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
     "Super-Shift-s" = launchCmd showKeysCmd;
-    "Super-e" = launchCmd "nautilus";
+    "Super-e" = launchCmd "nautilus --new-window";
   };
   dmsRemap = {
     "Super-a" = launchCmd "dms ipc call spotlight toggle";
@@ -69,7 +69,6 @@ let
     "Super-o" = niriAction "consume-window-into-column";
     "Super-Shift-o" = niriAction "expel-window-from-column";
     "Super-space" = niriAction "switch-focus-between-floating-and-tiling";
-    "Super-l" = launchCmd "swaylock";
 
     "Super-Tab" = niriAction "toggle-overview";
 
@@ -80,7 +79,7 @@ let
     "Super-h" = niriAction "focus-column-or-monitor-left";
     "Super-j" = niriAction "focus-window-or-workspace-down";
     "Super-k" = niriAction "focus-window-or-workspace-up";
-    "Alt-Tab" = niriAction "focus-window-or-workspace-down";
+    "Super-l" = niriAction "focus-column-or-monitor-right";
     "Super-Ctrl-Left" = niriAction "focus-monitor-left";
     "Super-Ctrl-Right" = niriAction "focus-monitor-right";
     "Super-Ctrl-Up" = niriAction "focus-monitor-up";
@@ -114,7 +113,7 @@ let
 
     "Super-t" = launchCmd "kitty";
     "Super-m" = launchCmd "kitty musicfox";
-    "Super-e" = launchCmd "dolphin";
+    "Super-e" = launchCmd "nautilus";
     "Super-c" = launchCmd "neovide";
     "Super-f" = launchCmd "firefox";
     "Ctrl-Shift-Esc" = launchCmd "kitty -e htop";
