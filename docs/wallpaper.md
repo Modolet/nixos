@@ -14,12 +14,14 @@
 - `wallpaper next` / `wallpaper prev` 轮播
 - `wallpaper mode <plain|recolor|monet>` 切换模式
 - `wallpaper current` 查看当前状态
+- `wallpaper apply --blur` 强制应用当前壁纸的模糊版本（不改状态）
 
 ## 模式说明
 
 - `plain`：原图直接设置。
 - `recolor`：使用当前 Stylix base16 调色板对壁纸重新上色，结果缓存到 `XDG_CACHE_HOME/wallpaper/recolor`。主题切换（home-manager 激活）后会自动重上色并更新。
 - `monet`：基于壁纸生成 Material You/Monet 配色（由 `matugen` 在 Nix 构建期生成 base16 方案），切换壁纸会同步切换到对应 `monet-*` 主题 specialisation。
+- 模糊（Niri）：`modules.wallpaper.focusBlur.enable = true` 时，检测到有窗口获得焦点会自动切换到模糊版壁纸，焦点消失时恢复原图。模糊强度可通过 `modules.wallpaper.blur.{sigma,radius}` 调整，缓存位于 `XDG_CACHE_HOME/wallpaper/blur/`。
 
 ## 状态与缓存
 

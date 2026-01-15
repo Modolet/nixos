@@ -80,6 +80,11 @@ let
 
   pythonRecolor = pkgs.python3.withPackages (ps: with ps; [ pillow tqdm ]);
   recolorScript = ../../tools/icon-recolor.py;
+  niriPackage =
+    if config ? programs && config.programs ? niri && config.programs.niri ? package then
+      config.programs.niri.package
+    else
+      pkgs.niri;
 
   mkMonetScheme =
     name: image:
@@ -206,6 +211,7 @@ let
     cacheDir = cfg.cacheDir;
     swww = cfg.swww;
     recolor = cfg.recolor;
+    blur = cfg.blur;
     monet = {
       enable = cfg.monet.enable;
       mapFile = monetMapPath;
@@ -220,6 +226,7 @@ let
       pkgs.gawk
       pkgs.jq
       pkgs.swww
+      pkgs.imagemagick
       pythonRecolor
     ];
     text = ''
@@ -362,7 +369,48 @@ let
         printf '%s\n' "$cached_file"
       }
 
+      blur_wallpaper() {
+        local source="$1"
+        local name="$2"
+        local enabled sigma radius radius_value blur_param cache_dir hash blurred_file done_file
+
+        enabled="$(jq -r '.blur.enable // false' "$config_file")"
+        if [ "$enabled" != "true" ]; then
+          printf '%s\n' "$source"
+          return 0
+        fi
+
+        sigma="$(jq -r '.blur.sigma // empty' "$config_file")"
+        radius="$(jq -r '.blur.radius // empty' "$config_file")"
+        radius_value="auto"
+        if [ -z "$sigma" ] || [ "$sigma" = "null" ]; then
+          sigma=20
+        fi
+        if [ -n "$radius" ] && [ "$radius" != "null" ]; then
+          radius_value="$radius"
+        fi
+
+        blur_param="0x${sigma}"
+        if [ "$radius_value" != "auto" ]; then
+          blur_param="${radius_value}x${sigma}"
+        fi
+
+        hash="$(sha256sum "$source" | awk '{print $1}')"
+        cache_dir="$cache_root/blur/${hash}-${radius_value}-${sigma}"
+        blurred_file="$cache_dir/$name"
+        done_file="$cache_dir/.done"
+
+        if [ ! -f "$done_file" ] || [ ! -f "$blurred_file" ]; then
+          mkdir -p "$cache_dir"
+          magick "$source" -filter Gaussian -blur "$blur_param" "$blurred_file"
+          touch "$done_file"
+        fi
+
+        printf '%s\n' "$blurred_file"
+      }
+
       apply_wallpaper() {
+        local apply_blur="${1:-0}"
         read_state
 
         local state_changed=0
@@ -395,6 +443,9 @@ let
         local target_path="$wallpaper_path_value"
         if [ "$mode" = "recolor" ]; then
           target_path="$(recolor_wallpaper "$wallpaper_path_value" "$wallpaper")"
+        fi
+        if [ "$apply_blur" -eq 1 ]; then
+          target_path="$(blur_wallpaper "$target_path" "$wallpaper")"
         fi
 
         ensure_swww
@@ -516,13 +567,107 @@ let
           esac
           ;;
         apply)
-          apply_wallpaper
+          local apply_blur=0
+          if [ $# -ge 2 ]; then
+            case "$2" in
+              --blur)
+                apply_blur=1
+                ;;
+              --plain|--no-blur)
+                apply_blur=0
+                ;;
+              *)
+                echo "usage: wallpaper apply [--blur|--plain]" >&2
+                exit 1
+                ;;
+            esac
+          elif [ "''${WALLPAPER_FORCE_BLUR:-0}" = "1" ]; then
+            apply_blur=1
+          fi
+          apply_wallpaper "$apply_blur"
           ;;
         *)
           echo "usage: wallpaper <list|current|set|next|prev|mode|apply>" >&2
+          echo "       wallpaper apply [--blur|--plain]" >&2
           exit 1
           ;;
       esac
+    '';
+  };
+
+  wallpaperFocusBlur = pkgs.writeShellApplication {
+    name = "wallpaper-focus-blur";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.jq
+      niriPackage
+      wallpaperScript
+    ];
+    text = ''
+      set -euo pipefail
+
+      wallpaper_cmd="${wallpaperScript}/bin/wallpaper"
+      niri_cmd="${niriPackage}/bin/niri"
+      interval_ms=${toString cfg.focusBlur.intervalMs}
+      sleep_duration="$(printf '%s.%03d\n' "$((interval_ms / 1000))" "$((interval_ms % 1000))")"
+
+      current_state="unknown"
+
+      have_focus() {
+        local output
+
+        if ! output="$("$niri_cmd" msg --json focused-window 2>/dev/null)"; then
+          return 2
+        fi
+
+        if [ -z "$output" ] || [ "$output" = "null" ]; then
+          return 1
+        fi
+
+        if echo "$output" | jq -e 'type == "null"' >/dev/null 2>&1; then
+          return 1
+        fi
+
+        if echo "$output" | jq -e 'type == "object"' >/dev/null 2>&1; then
+          return 0
+        fi
+
+        return 0
+      }
+
+      apply_state() {
+        local target="$1"
+
+        if [ "$current_state" = "$target" ]; then
+          return 0
+        fi
+
+        if [ "$target" = "blur" ]; then
+          WALLPAPER_FORCE_BLUR=1 "$wallpaper_cmd" apply --blur || return 1
+        else
+          "$wallpaper_cmd" apply --plain || return 1
+        fi
+
+        current_state="$target"
+      }
+
+      export WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-wayland-0}"
+
+      while true; do
+        if have_focus; then
+          apply_state "blur" || true
+        else
+          status=$?
+          if [ "$status" -eq 1 ]; then
+            apply_state "plain" || true
+          else
+            sleep "$sleep_duration"
+            continue
+          fi
+        fi
+
+        sleep "$sleep_duration"
+      done
     '';
   };
 in
@@ -610,6 +755,37 @@ in
       };
     };
 
+    blur = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable generating blurred wallpapers for focus-based switching.";
+      };
+      sigma = mkOption {
+        type = types.float;
+        default = 25.0;
+        description = "Gaussian blur sigma for blurred wallpapers.";
+      };
+      radius = mkOption {
+        type = types.nullOr types.float;
+        default = null;
+        description = "Gaussian blur radius (null to let ImageMagick decide).";
+      };
+    };
+
+    focusBlur = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable switching to blurred wallpaper when a window is focused (Niri only).";
+      };
+      intervalMs = mkOption {
+        type = types.int;
+        default = 500;
+        description = "Polling interval in milliseconds for focus detection.";
+      };
+    };
+
     monet = {
       enable = mkOption {
         type = types.bool;
@@ -664,6 +840,10 @@ in
         assertion = defaultWallpaper == null || lib.elem defaultWallpaper wallpaperNames;
         message = "modules.wallpaper.defaultWallpaper must exist in wallpaper list.";
       }
+      {
+        assertion = (!cfg.focusBlur.enable) || cfg.focusBlur.intervalMs > 0;
+        message = "modules.wallpaper.focusBlur.intervalMs must be positive.";
+      }
     ];
 
     xdg.configFile.${paletteFile}.text = builtins.toJSON stylixPalette;
@@ -703,6 +883,29 @@ in
       };
       Install.WantedBy = [ "graphical-session.target" ];
     };
+
+    systemd.user.services.wallpaper-focus-blur =
+      lib.mkIf (cfg.focusBlur.enable && (config.programs ? niri && config.programs.niri.enable)) {
+        Unit = {
+          Description = "Switch wallpaper blur based on Niri focus";
+          PartOf = [ "graphical-session.target" ];
+          After = [
+            "graphical-session.target"
+            "wallpaper-apply.service"
+            "swww-daemon.service"
+          ];
+          Wants = [
+            "wallpaper-apply.service"
+            "swww-daemon.service"
+          ];
+        };
+        Service = {
+          ExecStart = "${wallpaperFocusBlur}/bin/wallpaper-focus-blur";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+      };
 
     home.activation.wallpaperMonetMap = lib.hm.dag.entryAfter [ "writeBoundary" ] (lib.optionalString cfg.monet.enable ''
       install -d ${lib.escapeShellArg cfg.stateDir}

@@ -34,6 +34,7 @@
   };
   modules.wallpaper = {
     enable = true;
+    focusBlur.enable = true;
   };
   programs = {
     home-manager.enable = true;
