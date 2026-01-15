@@ -211,6 +211,9 @@ let
     cacheDir = cfg.cacheDir;
     swww = cfg.swww;
     recolor = cfg.recolor;
+    focusBlur = {
+      swww = cfg.focusBlur.swww;
+    };
     blur = cfg.blur;
     monet = {
       enable = cfg.monet.enable;
@@ -310,12 +313,19 @@ let
       }
 
       build_swww_args() {
+        local profile="''${1:-normal}"
         local ttype tfps tduration tbezier tstep
-        ttype="$(jq -r '.swww.transition.type // empty' "$config_file")"
-        tfps="$(jq -r '.swww.transition.fps // empty' "$config_file")"
-        tduration="$(jq -r '.swww.transition.duration // empty' "$config_file")"
-        tbezier="$(jq -r '.swww.transition.bezier // empty' "$config_file")"
-        tstep="$(jq -r '.swww.transition.step // empty' "$config_file")"
+        local base_path=".swww.transition"
+
+        if [ "$profile" = "focus-blur" ]; then
+          base_path=".focusBlur.swww.transition"
+        fi
+
+        ttype="$(jq -r "''${base_path}.type // empty" "$config_file")"
+        tfps="$(jq -r "''${base_path}.fps // empty" "$config_file")"
+        tduration="$(jq -r "''${base_path}.duration // empty" "$config_file")"
+        tbezier="$(jq -r "''${base_path}.bezier // empty" "$config_file")"
+        tstep="$(jq -r "''${base_path}.step // empty" "$config_file")"
 
         swww_args=()
         if [ -n "$ttype" ] && [ "$ttype" != "null" ]; then
@@ -411,6 +421,7 @@ let
 
       apply_wallpaper() {
         local apply_blur="''${1:-0}"
+        local transition_profile="''${2:-normal}"
         read_state
 
         local state_changed=0
@@ -449,7 +460,7 @@ let
         fi
 
         ensure_swww
-        build_swww_args
+        build_swww_args "$transition_profile"
         swww img "''${swww_args[@]}" "$target_path"
 
         local theme_spec desired_theme
@@ -584,7 +595,8 @@ let
           elif [ "''${WALLPAPER_FORCE_BLUR:-0}" = "1" ]; then
             apply_blur=1
           fi
-          apply_wallpaper "$apply_blur"
+          transition_profile="''${WALLPAPER_TRANSITION_PROFILE:-normal}"
+          apply_wallpaper "$apply_blur" "$transition_profile"
           ;;
         *)
           echo "usage: wallpaper <list|current|set|next|prev|mode|apply>" >&2
@@ -643,9 +655,9 @@ let
         fi
 
         if [ "$target" = "blur" ]; then
-          WALLPAPER_FORCE_BLUR=1 "$wallpaper_cmd" apply --blur || return 1
+          WALLPAPER_TRANSITION_PROFILE=focus-blur WALLPAPER_FORCE_BLUR=1 "$wallpaper_cmd" apply --blur || return 1
         else
-          "$wallpaper_cmd" apply --plain || return 1
+          WALLPAPER_TRANSITION_PROFILE=focus-blur "$wallpaper_cmd" apply --plain || return 1
         fi
 
         current_state="$target"
@@ -783,6 +795,35 @@ in
         type = types.int;
         default = 500;
         description = "Polling interval in milliseconds for focus detection.";
+      };
+      swww = {
+        transition = {
+          type = mkOption {
+            type = types.str;
+            default = "none";
+            description = "swww transition type for focus-based blur switching.";
+          };
+          duration = mkOption {
+            type = types.float;
+            default = 0.0;
+            description = "swww transition duration for focus-based blur switching.";
+          };
+          fps = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = "swww transition fps for focus-based blur switching (null to disable).";
+          };
+          bezier = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "swww transition bezier for focus-based blur switching (null to disable).";
+          };
+          step = mkOption {
+            type = types.nullOr types.int;
+            default = 255;
+            description = "swww transition step for focus-based blur switching (null to disable).";
+          };
+        };
       };
     };
 
