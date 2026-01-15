@@ -25,12 +25,12 @@ _: {
     '';
   };
 
-  services.xserver.videoDrivers = [
-    "nvidia"
-  ];
+  # services.xserver.videoDrivers = [
+  #   "nvidia"
+  # ];
 
   hardware.cpu.amd.updateMicrocode = true;
-  hardware.nvidia = {
-    open = true;
-  };
+  # hardware.nvidia = {
+  #   open = true;
+  # };
 }
