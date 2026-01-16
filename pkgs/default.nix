@@ -13,6 +13,7 @@ in
         overlays = [
           overlays
           packages
+          inputs.nur.overlay
         ];
         config = { };
       };
@@ -24,5 +25,6 @@ in
   flake.overlays = {
     default = overlays;
     inherit packages;
+    nur = inputs.nur.overlay;
   };
 }

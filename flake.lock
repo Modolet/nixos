@@ -457,6 +457,7 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nixvim": "nixvim",
+        "nur": "nur",
         "quickshell": "quickshell_2",
         "stylix": "stylix"
       }

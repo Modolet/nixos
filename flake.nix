@@ -24,6 +24,7 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nur.url = "github:nix-community/NUR";
     dankMaterialShell.url = "github:AvengeMedia/DankMaterialShell";
     quickshell = {
       url = "git+https://git.outfoxxed.me/quickshell/quickshell";
