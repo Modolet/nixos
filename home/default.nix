@@ -8,8 +8,8 @@
     ./ai
     ./lib
     ./im
+    ./develop
   ];
-
   modules.nvim = {
     enable = true;
     extras = {
