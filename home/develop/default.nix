@@ -6,9 +6,15 @@
     rustup
     gcc-arm-embedded
     cargo-xwin
-    clang
-    llvm
+    llvmPackages.bintools
     cmake
     ninja
+    gcc
+    stm32cubemx
+    probe-rs
+    pyocd
+    stlink
+    jetbrains.clion
+    qtcreator
   ];
 }
