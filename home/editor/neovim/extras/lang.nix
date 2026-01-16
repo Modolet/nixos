@@ -6,7 +6,7 @@ in {
     rust = mkLangExtra {
       lang = "rust";
       plugins = withVimPlugins [ "crates-nvim" "rustaceanvim" "neotest" ];
-      lspServers = withPkgs [ "rust-analyzer" ];
+      lspServers = withPkgs [  ];
       grammars = [ "rust" ];
     };
 

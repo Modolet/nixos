@@ -8,15 +8,26 @@
     nushell = {
       enable = true;
       package = pkgs.nushell;
-      extraConfig =
-        let
-          conf = builtins.toJSON {
-            show_banner = false;
-          };
-        in
-        ''
-          $env.config = ${conf};
-        '';
+      settings = {
+        show_banner = false;
+      };
+      environmentVariables = {
+    DISPLAY  = ":0";
+    GTK_IM_MODULE  = "fcitx";
+    QT_IM_MODULE = "fcitx";
+    XIM = "fcitx";
+    DMS_DISABLE_MATUGEN = "1";
+
+      };
+      # extraConfig =
+      #   let
+      #     conf = builtins.toJSON {
+      #       show_banner = false;
+      #     };
+      #   in
+      #   ''
+      #     $env.config = ${conf};
+      #   '';
     };
 
     starship = {

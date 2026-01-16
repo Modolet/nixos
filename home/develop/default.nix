@@ -6,5 +6,9 @@
     rustup
     gcc-arm-embedded
     cargo-xwin
+    clang
+    llvm
+    cmake
+    ninja
   ];
 }

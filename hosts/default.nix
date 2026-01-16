@@ -17,6 +17,7 @@
           ../system
           ../system/desktop
           inputs.stylix.nixosModules.stylix
+          inputs.nur.modules.nixos.default
           {
             home-manager = {
               users.modolet.imports = with inputs; [
@@ -40,6 +41,7 @@
           ../system
           ../system/desktop
           inputs.stylix.nixosModules.stylix
+          inputs.nur.modules.nixos.default
           {
             home-manager = {
               users.modolet.imports = with inputs; [

@@ -25,6 +25,5 @@ in
   flake.overlays = {
     default = overlays;
     inherit packages;
-    nur = inputs.nur.overlay;
   };
 }
