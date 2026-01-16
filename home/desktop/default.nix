@@ -165,6 +165,8 @@ in
   home.sessionVariables = {
     XDG_DATA_DIRS = xdgDataDirs;
   };
+  systemd.user.sessionVariables =
+    lib.filterAttrs (_: v: v != null) config.home.sessionVariables;
 
   systemd.user.services.theme-switch-restore = {
     Unit = {

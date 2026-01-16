@@ -7,7 +7,7 @@
         let
           inherit (config.services.displayManager.sessionData) desktops;
           startNiri = pkgs.writeShellScript "start-niri-via-systemd" ''
-            exec ${pkgs.systemd}/bin/systemctl --user start --wait niri.service
+            exec ${pkgs.niri}/bin/niri-session
           '';
         in
         # bash
