@@ -8,6 +8,7 @@
 
   environment.systemPackages = [
     pkgs.xremap
+    pkgs.openrgb-with-all-plugins
   ];
   services = {
     # displayManager.gdm.enable = false;
@@ -37,6 +38,10 @@
 
     udisks2.enable = true;
     gvfs.enable = true;
+    hardware.openrgb = {
+      enable = true;
+      package = pkgs.openrgb-with-all-plugins;
+    };
   };
   programs.dconf.enable = true;
 

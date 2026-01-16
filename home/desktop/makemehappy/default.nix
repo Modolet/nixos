@@ -8,5 +8,8 @@
     neovide
     vlc
     obs-studio
+    clash-verge-rev
+    wpsoffice-cn
+    wemeet
   ];
 }
