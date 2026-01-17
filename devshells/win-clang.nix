@@ -26,76 +26,23 @@ _: {
         set(CMAKE_RC_COMPILER llvm-rc)
         set(CMAKE_AR llvm-lib)
       '';
-      winWrappers = pkgs.runCommand "win-clang-wrappers" { } ''
-        mkdir -p "$out/bin"
-        cat > "$out/bin/cc" <<'EOF'
-        #!${pkgs.runtimeShell}
-        set -euo pipefail
-        WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
-        WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
-        XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
-
-        resolve_win_target() {
-          if [ -n "''${WIN_TARGET:-}" ]; then
-            echo "$WIN_TARGET"
-            return
-          fi
-          local dir="$PWD"
-          while [ "$dir" != "/" ]; do
-            if [ -f "$dir/CMakeCache.txt" ]; then
-              local target
-              target="$(awk -F= '/^WIN_TARGET:/{print $2; exit}' "$dir/CMakeCache.txt")"
-              if [ -n "$target" ]; then
-                echo "$target"
-                return
-              fi
-            fi
-            dir="$(dirname "$dir")"
-          done
-          echo "x86_64-pc-windows-msvc"
-        }
-
-        normalize_win_target() {
-          case "$1" in
-            i686) echo "i686-pc-windows-msvc" ;;
-            x86_64) echo "x86_64-pc-windows-msvc" ;;
-            *) echo "$1" ;;
-          esac
-        }
-
-        WIN_TARGET="$(normalize_win_target "$(resolve_win_target)")"
-        export WIN_TARGET
-
-        case "$WIN_TARGET" in
-          i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
-          x86_64*) WIN_SDK_ARCH="x86_64"; MACHINE_FLAG="/machine:x64" ;;
-          *) echo "Unsupported WIN_TARGET: $WIN_TARGET" >&2; exit 1 ;;
-        esac
-
-        XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
-        XWIN_SDK_DIR="$XWIN_SYSROOT/WindowsKits/10"
-
-        include_paths=(
-          "$XWIN_CRT_DIR/include"
-          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/shared"
-          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/um"
-          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/ucrt"
-          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/winrt"
-          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/cppwinrt"
-        )
-        lib_paths=(
-          "$XWIN_CRT_DIR/lib/$WIN_SDK_ARCH"
-          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/ucrt/$WIN_SDK_ARCH"
-          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/um/$WIN_SDK_ARCH"
-        )
-        join_by() {
-          local IFS="$1"
-          shift
-          echo "$*"
-        }
-        INCLUDE="$(join_by ';' "''${include_paths[@]}")''${INCLUDE:+;$INCLUDE}"
-        LIB="$(join_by ';' "''${lib_paths[@]}")''${LIB:+;$LIB}"
-        export INCLUDE LIB
+      winCommonScript = pkgs.writeText "win-clang-common.sh" (
+        builtins.readFile ./win-clang/common.sh
+      );
+      mkWinWrapper =
+        name: text:
+        pkgs.writeShellScriptBin name ''
+          set -euo pipefail
+          : "''${WIN_SDK_VERSION:=${winSdkVersion}}"
+          : "''${WIN_CRT_VERSION:=${winCrtVersion}}"
+          : "''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
+          CLANG_CL="${llvmPkgs.clang-unwrapped}/bin/clang-cl"
+          LLD_LINK="${llvmPkgs.lld}/bin/lld-link"
+          source ${winCommonScript}
+          ${text}
+        '';
+      ccWrapper = mkWinWrapper "cc" ''
+        win_setup_env "$@"
 
         needs_link=1
         for arg in "$@"; do
@@ -110,90 +57,26 @@ _: {
             "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}"
             "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}"
             "/libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}"
-            "$MACHINE_FLAG"
+            "''${MACHINE_FLAG}"
           )
         fi
 
-        exec ${llvmPkgs.clang-unwrapped}/bin/clang-cl \
-          /vctoolsdir "$XWIN_CRT_DIR" \
-          /winsdkdir "$XWIN_SDK_DIR" \
-          --target="$WIN_TARGET" \
+        exec "''${CLANG_CL}" \
+          /vctoolsdir "''${XWIN_CRT_DIR}" \
+          /winsdkdir "''${XWIN_SDK_DIR}" \
+          --target="''${WIN_TARGET}" \
           -fuse-ld=lld \
           "$@" \
           "''${link_args[@]}"
-        EOF
-        chmod +x "$out/bin/cc"
-
-        cat > "$out/bin/c++" <<'EOF'
-        #!${pkgs.runtimeShell}
+      '';
+      cxxWrapper = pkgs.writeShellScriptBin "c++" ''
         exec cc "$@"
-        EOF
-        chmod +x "$out/bin/c++"
-
-        cat > "$out/bin/cl" <<'EOF'
-        #!${pkgs.runtimeShell}
+      '';
+      clWrapper = pkgs.writeShellScriptBin "cl" ''
         exec cc "$@"
-        EOF
-        chmod +x "$out/bin/cl"
-
-        cat > "$out/bin/lld-link" <<'EOF'
-        #!${pkgs.runtimeShell}
-        set -euo pipefail
-        WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
-        WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
-        XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
-
-        resolve_win_target() {
-          if [ -n "''${WIN_TARGET:-}" ]; then
-            echo "$WIN_TARGET"
-            return
-          fi
-          local dir="$PWD"
-          while [ "$dir" != "/" ]; do
-            if [ -f "$dir/CMakeCache.txt" ]; then
-              local target
-              target="$(awk -F= '/^WIN_TARGET:/{print $2; exit}' "$dir/CMakeCache.txt")"
-              if [ -n "$target" ]; then
-                echo "$target"
-                return
-              fi
-            fi
-            dir="$(dirname "$dir")"
-          done
-          echo "x86_64-pc-windows-msvc"
-        }
-
-        normalize_win_target() {
-          case "$1" in
-            i686) echo "i686-pc-windows-msvc" ;;
-            x86_64) echo "x86_64-pc-windows-msvc" ;;
-            *) echo "$1" ;;
-          esac
-        }
-
-        WIN_TARGET="$(normalize_win_target "$(resolve_win_target)")"
-        export WIN_TARGET
-
-        case "$WIN_TARGET" in
-          i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
-          x86_64*) WIN_SDK_ARCH="x86_64"; MACHINE_FLAG="/machine:x64" ;;
-          *) echo "Unsupported WIN_TARGET: $WIN_TARGET" >&2; exit 1 ;;
-        esac
-
-        XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
-        XWIN_SDK_DIR="$XWIN_SYSROOT/WindowsKits/10"
-        lib_paths=(
-          "$XWIN_CRT_DIR/lib/$WIN_SDK_ARCH"
-          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/ucrt/$WIN_SDK_ARCH"
-          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/um/$WIN_SDK_ARCH"
-        )
-        join_by() {
-          local IFS="$1"
-          shift
-          echo "$*"
-        }
-        LIB="$(join_by ';' "''${lib_paths[@]}")''${LIB:+;$LIB}"
-        export LIB
+      '';
+      lldLinkWrapper = mkWinWrapper "lld-link" ''
+        win_setup_env "$@"
 
         extra_args=(
           "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}"
@@ -202,21 +85,26 @@ _: {
         )
         case " $* " in
           *" /machine:"*) ;;
-          *) extra_args+=("$MACHINE_FLAG") ;;
+          *) extra_args+=("''${MACHINE_FLAG}") ;;
         esac
 
-        exec ${llvmPkgs.lld}/bin/lld-link \
+        exec "''${LLD_LINK}" \
           "''${extra_args[@]}" \
           "$@"
-        EOF
-        chmod +x "$out/bin/lld-link"
-
-        cat > "$out/bin/link" <<'EOF'
-        #!${pkgs.runtimeShell}
-        exec lld-link "$@"
-        EOF
-        chmod +x "$out/bin/link"
       '';
+      linkWrapper = pkgs.writeShellScriptBin "link" ''
+        exec lld-link "$@"
+      '';
+      winWrappers = pkgs.symlinkJoin {
+        name = "win-clang-wrappers";
+        paths = [
+          ccWrapper
+          cxxWrapper
+          clWrapper
+          lldLinkWrapper
+          linkWrapper
+        ];
+      };
       winSysroot = pkgs.stdenvNoCC.mkDerivation {
         pname = "xwin-sysroot";
         inherit (pkgs.xwin) version;
