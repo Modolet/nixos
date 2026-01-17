@@ -1,12 +1,18 @@
 { pkgs, helpers }:
 
-let inherit (helpers) mkLangExtra withVimPlugins withPkgs;
-in {
+let
+  inherit (helpers) mkLangExtra withVimPlugins withPkgs;
+in
+{
   lang = {
     rust = mkLangExtra {
       lang = "rust";
-      plugins = withVimPlugins [ "crates-nvim" "rustaceanvim" "neotest" ];
-      lspServers = withPkgs [  ];
+      plugins = withVimPlugins [
+        "crates-nvim"
+        "rustaceanvim"
+        "neotest"
+      ];
+      lspServers = withPkgs [ ];
       grammars = [ "rust" ];
     };
 
@@ -21,21 +27,37 @@ in {
         "venv-selector-nvim"
         "nvim-dap"
       ];
-      lspServers = withPkgs [ "pyright" "black" "isort" "ruff" ];
+      lspServers = withPkgs [
+        "pyright"
+        "black"
+        "isort"
+        "ruff"
+      ];
       grammars = [ "python" ];
     };
 
     typescript = mkLangExtra {
       lang = "typescript";
-      plugins = withVimPlugins [ "nvim-dap" "mini-nvim" ];
+      plugins = withVimPlugins [
+        "nvim-dap"
+        "mini-nvim"
+      ];
       lspServers = withPkgs [ "typescript-language-server" ];
-      grammars = [ "typescript" "tsx" "javascript" ];
+      grammars = [
+        "typescript"
+        "tsx"
+        "javascript"
+      ];
     };
 
     nix = mkLangExtra {
       lang = "nix";
       # lspServers = withPkgs [ "nil" "nixfmt-classic" "statix" ];
-      lspServers = withPkgs [ "nil" "nixd" "statix" ];
+      lspServers = withPkgs [
+        "nil"
+        "nixd"
+        "statix"
+      ];
       grammars = [ "nix" ];
       defaultEnabled = true;
     };
@@ -44,29 +66,49 @@ in {
       lang = "json";
       plugins = withVimPlugins [ "SchemaStore-nvim" ];
       lspServers = withPkgs [ "vscode-langservers-extracted" ];
-      grammars = [ "json" "json5"];
+      grammars = [
+        "json"
+        "json5"
+      ];
     };
 
     clangd = mkLangExtra {
       lang = "clangd";
-      plugins =
-        withVimPlugins [ "clangd_extensions-nvim" "nvim-cmp" "nvim-dap" ];
+      plugins = withVimPlugins [
+        "clangd_extensions-nvim"
+        "nvim-cmp"
+        "nvim-dap"
+      ];
       lspServers = withPkgs [ "clang-tools" ];
-      grammars = [ "c" "cpp" ];
+      grammars = [
+        "c"
+        "cpp"
+      ];
     };
 
     cmake = mkLangExtra {
       lang = "cmake";
       plugins = withVimPlugins [ "cmake-tools-nvim" ];
-      lspServers = withPkgs [ "cmake-language-server" "neocmakelsp" ];
-      grammars = [ "cmake" ];
+      lspServers = withPkgs [
+        "cmake-language-server"
+        "neocmakelsp"
+        "cmake-lint"
+      ];
+      grammars = [
+        "cmake"
+      ];
     };
 
     markdown = mkLangExtra {
       lang = "markdown";
-      plugins =
-        withVimPlugins [ "markdown-preview-nvim" "render-markdown-nvim" ];
-      lspServers = withPkgs [ "marksman" "markdownlint-cli2" ];
+      plugins = withVimPlugins [
+        "markdown-preview-nvim"
+        "render-markdown-nvim"
+      ];
+      lspServers = withPkgs [
+        "marksman"
+        "markdownlint-cli2"
+      ];
       grammars = [ "markdown" ];
     };
 
@@ -86,7 +128,10 @@ in {
       lang = "ansible";
       plugins = withVimPlugins [ "nvim-ansible" ];
       lspServers = withPkgs [ "ansible-language-server" ];
-      grammars = [ "ansible" "yaml" ];
+      grammars = [
+        "ansible"
+        "yaml"
+      ];
     };
 
     astro = mkLangExtra {
@@ -119,8 +164,11 @@ in {
 
     elixir = mkLangExtra {
       lang = "elixir";
-      plugins =
-        withVimPlugins [ "neotest-elixir" "neotest" "render-markdown-nvim" ];
+      plugins = withVimPlugins [
+        "neotest-elixir"
+        "neotest"
+        "render-markdown-nvim"
+      ];
       lspServers = withPkgs [ "elixir-ls" ];
       grammars = [ "elixir" ];
     };
@@ -139,8 +187,15 @@ in {
 
     git = mkLangExtra {
       lang = "git";
-      plugins = withVimPlugins [ "cmp-git" "nvim-cmp" ];
-      grammars = [ "git_rebase" "gitattributes" "gitignore" ];
+      plugins = withVimPlugins [
+        "cmp-git"
+        "nvim-cmp"
+      ];
+      grammars = [
+        "git_rebase"
+        "gitattributes"
+        "gitignore"
+      ];
     };
 
     gleam = mkLangExtra {
@@ -158,8 +213,15 @@ in {
         "neotest"
         "nvim-dap"
       ];
-      lspServers = withPkgs [ "gopls" "delve" ];
-      grammars = [ "go" "gomod" "gowork" ];
+      lspServers = withPkgs [
+        "gopls"
+        "delve"
+      ];
+      grammars = [
+        "go"
+        "gomod"
+        "gowork"
+      ];
     };
 
     haskell = mkLangExtra {
@@ -187,7 +249,11 @@ in {
 
     java = mkLangExtra {
       lang = "java";
-      plugins = withVimPlugins [ "nvim-jdtls" "which-key-nvim" "nvim-dap" ];
+      plugins = withVimPlugins [
+        "nvim-jdtls"
+        "which-key-nvim"
+        "nvim-dap"
+      ];
       lspServers = withPkgs [ "jdt-language-server" ];
       grammars = [ "java" ];
     };
@@ -195,13 +261,19 @@ in {
     kotlin = mkLangExtra {
       lang = "kotlin";
       plugins = withVimPlugins [ "nvim-dap" ];
-      lspServers = withPkgs [ "kotlin-language-server" "ktlint" ];
+      lspServers = withPkgs [
+        "kotlin-language-server"
+        "ktlint"
+      ];
       grammars = [ "kotlin" ];
     };
 
     lean = mkLangExtra {
       lang = "lean";
-      plugins = withVimPlugins [ "lean-nvim" "plenary-nvim" ];
+      plugins = withVimPlugins [
+        "lean-nvim"
+        "plenary-nvim"
+      ];
       lspServers = withPkgs [ "lean-language-server" ];
       grammars = [ "lean" ];
     };
@@ -264,23 +336,33 @@ in {
 
     ruby = mkLangExtra {
       lang = "ruby";
-      plugins =
-        withVimPlugins [ "neotest-rspec" "nvim-dap-ruby" "neotest" "nvim-dap" ];
+      plugins = withVimPlugins [
+        "neotest-rspec"
+        "nvim-dap-ruby"
+        "neotest"
+        "nvim-dap"
+      ];
       lspServers = withPkgs [ "solargraph" ];
       grammars = [ "ruby" ];
     };
 
     scala = mkLangExtra {
       lang = "scala";
-      plugins = withVimPlugins [ "nvim-metals" "nvim-dap" ];
+      plugins = withVimPlugins [
+        "nvim-metals"
+        "nvim-dap"
+      ];
       lspServers = withPkgs [ "metals" ];
       grammars = [ "scala" ];
     };
 
     sql = mkLangExtra {
       lang = "sql";
-      plugins =
-        withVimPlugins [ "vim-dadbod" "vim-dadbod-completion" "vim-dadbod-ui" ];
+      plugins = withVimPlugins [
+        "vim-dadbod"
+        "vim-dadbod-completion"
+        "vim-dadbod-ui"
+      ];
       lspServers = withPkgs [ "sqlls" ];
       grammars = [ "sql" ];
     };
@@ -293,7 +375,10 @@ in {
 
     tailwind = mkLangExtra {
       lang = "tailwind";
-      plugins = withVimPlugins [ "tailwindcss-colorizer-cmp-nvim" "nvim-cmp" ];
+      plugins = withVimPlugins [
+        "tailwindcss-colorizer-cmp-nvim"
+        "nvim-cmp"
+      ];
       lspServers = withPkgs [ "tailwindcss-language-server" ];
       grammars = [ "css" ];
     };
@@ -306,7 +391,10 @@ in {
         "telescope-nvim"
       ];
       lspServers = withPkgs [ "terraform-ls" ];
-      grammars = [ "terraform" "hcl" ];
+      grammars = [
+        "terraform"
+        "hcl"
+      ];
     };
 
     tex = mkLangExtra {
@@ -337,7 +425,10 @@ in {
 
     zig = mkLangExtra {
       lang = "zig";
-      plugins = withVimPlugins [ "neotest-zig" "neotest" ];
+      plugins = withVimPlugins [
+        "neotest-zig"
+        "neotest"
+      ];
       lspServers = withPkgs [ "zls" ];
       grammars = [ "zig" ];
     };
