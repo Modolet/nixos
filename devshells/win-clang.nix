@@ -39,7 +39,7 @@ _: {
         set(WIN_CRT_VERSION "$ENV{WIN_CRT_VERSION}")
         set(XWIN_SYSROOT "$ENV{XWIN_SYSROOT}")
         set(XWIN_CRT_DIR "''${XWIN_SYSROOT}/VC/Tools/MSVC/''${WIN_CRT_VERSION}")
-        set(XWIN_SDK_DIR "''${XWIN_SYSROOT}/Windows Kits/10")
+        set(XWIN_SDK_DIR "''${XWIN_SYSROOT}/WindowsKits/10")
 
         set(CMAKE_C_COMPILER clang-cl)
         set(CMAKE_CXX_COMPILER clang-cl)
@@ -84,7 +84,7 @@ _: {
         esac
 
         XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
-        XWIN_SDK_DIR="$XWIN_SYSROOT/Windows Kits/10"
+        XWIN_SDK_DIR="$XWIN_SYSROOT/WindowsKits/10"
 
         needs_link=1
         for arg in "$@"; do
@@ -132,7 +132,7 @@ _: {
         dontUnpack = true;
         outputHashMode = "recursive";
         outputHashAlgo = "sha256";
-        outputHash = "sha256-5L4WHIxe94O7CrFdJPYSJ4g70tldCpyRpN7ijSd/bsc=";
+        outputHash = pkgs.lib.fakeSha256;
         installPhase = ''
           export XWIN_ACCEPT_LICENSE=1
           export XWIN_CACHE_DIR="$TMPDIR/xwin-cache"
@@ -158,6 +158,8 @@ _: {
             --use-winsysroot-style \
             --include-debug-libs \
             --copy
+
+          ln -s "$out/Windows Kits" "$out/WindowsKits"
         '';
       };
     in
