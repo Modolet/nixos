@@ -1,32 +1,33 @@
-{ lib
-, stdenvNoCC
-, fetchzip
-, autoPatchelfHook
-, makeWrapper
-, gtk3
-, glib
-, pango
-, cairo
-, gdk-pixbuf
-, atk
-, at-spi2-atk
-, at-spi2-core
-, dbus
-, libxkbcommon
-, fontconfig
-, freetype
-, zlib
-, nss
-, nspr
-, alsa-lib
-, cups
-, libGL
-, libGLU
-, libdrm
-, mesa
-, libpng
-, libjpeg
-, xorg
+{
+  lib,
+  stdenvNoCC,
+  fetchzip,
+  autoPatchelfHook,
+  makeWrapper,
+  gtk3,
+  glib,
+  pango,
+  cairo,
+  gdk-pixbuf,
+  atk,
+  at-spi2-atk,
+  at-spi2-core,
+  dbus,
+  libxkbcommon,
+  fontconfig,
+  freetype,
+  zlib,
+  nss,
+  nspr,
+  alsa-lib,
+  cups,
+  libGL,
+  libGLU,
+  libdrm,
+  mesa,
+  libpng,
+  libjpeg,
+  xorg,
 }:
 
 stdenvNoCC.mkDerivation rec {
@@ -35,13 +36,16 @@ stdenvNoCC.mkDerivation rec {
 
   src = fetchzip {
     url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202510-lin64.tgz";
-    hash = "sha256-Iv+kwq47FL4WGZmXpZ3LWwUT3mF3ZqWjKG6NcB0BamM=";
+    hash = "sha256-32CW1PLHUT2QDMY2PGYqf8aQWDf30kJ/SMSC1rwwx84=";
     stripRoot = true;
   };
 
-  sourceRoot = "NucleiStudio";
+  dontUnpack = true;
 
-  nativeBuildInputs = [ autoPatchelfHook makeWrapper ];
+  nativeBuildInputs = [
+    autoPatchelfHook
+    makeWrapper
+  ];
   buildInputs = [
     gtk3
     glib
@@ -84,31 +88,31 @@ stdenvNoCC.mkDerivation rec {
   ];
 
   installPhase = ''
-    runHook preInstall
+        runHook preInstall
 
     mkdir -p $out/opt/nuclei-studio-ide
-    cp -r . $out/opt/nuclei-studio-ide
+    cp -r $src/NucleiStudio/. $out/opt/nuclei-studio-ide
 
-    chmod +x $out/opt/nuclei-studio-ide/NucleiStudio
+        chmod +x $out/opt/nuclei-studio-ide/NucleiStudio
 
-    mkdir -p $out/bin $out/share/applications $out/share/pixmaps
-    ln -s $out/opt/nuclei-studio-ide/icon.xpm $out/share/pixmaps/nuclei-studio-ide.xpm
+        mkdir -p $out/bin $out/share/applications $out/share/pixmaps
+        ln -s $out/opt/nuclei-studio-ide/icon.xpm $out/share/pixmaps/nuclei-studio-ide.xpm
 
-    makeWrapper $out/opt/nuclei-studio-ide/NucleiStudio $out/bin/nuclei-studio-ide \
-      --chdir $out/opt/nuclei-studio-ide
+        makeWrapper $out/opt/nuclei-studio-ide/NucleiStudio $out/bin/nuclei-studio-ide \
+          --chdir $out/opt/nuclei-studio-ide
 
-    cat > $out/share/applications/nuclei-studio-ide.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=NucleiStudio IDE
-Comment=Eclipse-based IDE for Nuclei RISC-V
-Exec=nuclei-studio-ide
-Icon=nuclei-studio-ide
-Categories=Development;IDE;
-Terminal=false
-EOF
+        cat > $out/share/applications/nuclei-studio-ide.desktop <<'EOF'
+    [Desktop Entry]
+    Type=Application
+    Name=NucleiStudio IDE
+    Comment=Eclipse-based IDE for Nuclei RISC-V
+    Exec=nuclei-studio-ide
+    Icon=nuclei-studio-ide
+    Categories=Development;IDE;
+    Terminal=false
+    EOF
 
-    runHook postInstall
+        runHook postInstall
   '';
 
   meta = with lib; {
