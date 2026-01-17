@@ -18,6 +18,24 @@ _: {
       ];
       cIncludePath = pkgs.lib.concatStringsSep ":" cIncludes;
       cxxIncludePath = pkgs.lib.concatStringsSep ":" (cxxIncludes ++ cIncludes);
+      clangdConfig = pkgs.writeTextDir "clangd/config.yaml" ''
+        CompileFlags:
+          Add:
+            - -nostdinc
+            - -nostdinc++
+            - -isystem
+            - ${gccLib}/include
+            - -isystem
+            - ${gccLib}/include-fixed
+            - -isystem
+            - ${sysroot}/include
+            - -isystem
+            - ${sysroot}/include/c++/${gccVersion}
+            - -isystem
+            - ${sysroot}/include/c++/${gccVersion}/arm-none-eabi
+            - -isystem
+            - ${sysroot}/include/c++/${gccVersion}/backward
+      '';
       llvmPkgs =
         if pkgs ? llvmPackages_21 then
           pkgs.llvmPackages_21
@@ -29,6 +47,7 @@ _: {
         #!${pkgs.runtimeShell}
         exec env -u CPATH -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH -u OBJC_INCLUDE_PATH \
           -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK -u NIX_LDFLAGS \
+          XDG_CONFIG_HOME="${clangdConfig}" \
           ${llvmPkgs.clang-tools}/bin/clangd \
           --query-driver="${gccArm}/bin/arm-none-eabi-*" \
           "$@"
