@@ -148,18 +148,33 @@ win_setup_include_lib() {
   local include_joined
   local lib_joined
   local extra_include
+  local extra_include_path
+  local extra_c_include
+  local extra_cxx_include
   local extra_lib
   local include_env
   local lib_env
   include_joined="$(win_join_by ';' "${include_paths[@]}")"
   lib_joined="$(win_join_by ';' "${lib_paths[@]}")"
   extra_include="$(win_normalize_list "${CMAKE_INCLUDE_PATH:-}")"
+  extra_include_path="$(win_normalize_list "${INCLUDE_PATH:-}")"
+  extra_c_include="$(win_normalize_list "${C_INCLUDE_PATH:-}")"
+  extra_cxx_include="$(win_normalize_list "${CPLUS_INCLUDE_PATH:-}")"
   extra_lib="$(win_normalize_list "${CMAKE_LIBRARY_PATH:-}")"
   include_env="${INCLUDE:-}"
   lib_env="${LIB:-}"
   INCLUDE="$include_joined"
   if [ -n "$extra_include" ]; then
     INCLUDE="$INCLUDE;$extra_include"
+  fi
+  if [ -n "$extra_include_path" ]; then
+    INCLUDE="$INCLUDE;$extra_include_path"
+  fi
+  if [ -n "$extra_c_include" ]; then
+    INCLUDE="$INCLUDE;$extra_c_include"
+  fi
+  if [ -n "$extra_cxx_include" ]; then
+    INCLUDE="$INCLUDE;$extra_cxx_include"
   fi
   if [ -n "$include_env" ]; then
     INCLUDE="$INCLUDE;$include_env"

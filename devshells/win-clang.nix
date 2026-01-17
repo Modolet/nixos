@@ -18,6 +18,15 @@ _: {
         pkgs.ninja
         pkgs.pkg-config
       ];
+      winIncludePaths = [
+        "${winSysroot}/VC/Tools/MSVC/${winCrtVersion}/include"
+        "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/shared"
+        "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/um"
+        "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/ucrt"
+        "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/winrt"
+        "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/cppwinrt"
+      ];
+      winIncludePath = builtins.concatStringsSep ":" winIncludePaths;
       winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
         set(CMAKE_SYSTEM_NAME Windows)
         set(CMAKE_C_COMPILER cc)
@@ -176,6 +185,10 @@ _: {
         WIN_SDK_VERSION = winSdkVersion;
         WIN_CRT_VERSION = winCrtVersion;
         CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
+        INCLUDE_PATH = winIncludePath;
+        C_INCLUDE_PATH = winIncludePath;
+        CPLUS_INCLUDE_PATH = winIncludePath;
+        CPATH = winIncludePath;
         NIX_CFLAGS_COMPILE = "";
         NIX_CFLAGS_LINK = "";
         NIX_LDFLAGS = "";
