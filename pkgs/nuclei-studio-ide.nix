@@ -88,31 +88,31 @@ stdenvNoCC.mkDerivation rec {
   ];
 
   installPhase = ''
-        runHook preInstall
+    runHook preInstall
 
     mkdir -p $out/opt/nuclei-studio-ide
     cp -r $src/NucleiStudio/. $out/opt/nuclei-studio-ide
 
-        chmod +x $out/opt/nuclei-studio-ide/NucleiStudio
+    chmod +x $out/opt/nuclei-studio-ide/NucleiStudio
 
-        mkdir -p $out/bin $out/share/applications $out/share/pixmaps
-        ln -s $out/opt/nuclei-studio-ide/icon.xpm $out/share/pixmaps/nuclei-studio-ide.xpm
+    mkdir -p $out/bin $out/share/applications $out/share/pixmaps
+    ln -s $out/opt/nuclei-studio-ide/icon.xpm $out/share/pixmaps/nuclei-studio-ide.xpm
 
-        makeWrapper $out/opt/nuclei-studio-ide/NucleiStudio $out/bin/nuclei-studio-ide \
-          --chdir $out/opt/nuclei-studio-ide
+    makeWrapper $out/opt/nuclei-studio-ide/NucleiStudio $out/bin/nuclei-studio-ide \
+      --chdir $out/opt/nuclei-studio-ide
 
-        cat > $out/share/applications/nuclei-studio-ide.desktop <<'EOF'
-    [Desktop Entry]
-    Type=Application
-    Name=NucleiStudio IDE
-    Comment=Eclipse-based IDE for Nuclei RISC-V
-    Exec=nuclei-studio-ide
-    Icon=nuclei-studio-ide
-    Categories=Development;IDE;
-    Terminal=false
-    EOF
+    cat > $out/share/applications/nuclei-studio-ide.desktop <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=NucleiStudio IDE
+Comment=Eclipse-based IDE for Nuclei RISC-V
+Exec=nuclei-studio-ide
+Icon=nuclei-studio-ide
+Categories=Development;IDE;
+Terminal=false
+EOF
 
-        runHook postInstall
+    runHook postInstall
   '';
 
   meta = with lib; {
