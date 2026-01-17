@@ -7,5 +7,6 @@
     stlink
     jetbrains.clion
     qtcreator
+    vscode
   ];
 }
