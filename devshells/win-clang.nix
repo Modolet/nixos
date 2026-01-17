@@ -44,6 +44,11 @@ _: {
       ccWrapper = mkWinWrapper "cc" ''
         win_setup_env "$@"
 
+        target_args=()
+        if ! win_args_has_target "$@"; then
+          target_args=(--target="''${WIN_TARGET}")
+        fi
+
         needs_link=1
         for arg in "$@"; do
           case "$arg" in
@@ -64,7 +69,7 @@ _: {
         exec "''${CLANG_CL}" \
           /vctoolsdir "''${XWIN_CRT_DIR}" \
           /winsdkdir "''${XWIN_SDK_DIR}" \
-          --target="''${WIN_TARGET}" \
+          "''${target_args[@]}" \
           -fuse-ld=lld \
           "$@" \
           "''${link_args[@]}"

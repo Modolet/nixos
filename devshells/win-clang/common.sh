@@ -9,13 +9,29 @@ win_find_cache_target() {
   while [ "$dir" != "/" ]; do
     if [ -f "$dir/CMakeCache.txt" ]; then
       local target
-      target="$(awk -F= '/^WIN_TARGET:/{print $2; exit}' "$dir/CMakeCache.txt")"
-      if [ -n "$target" ]; then
-        echo "$target"
-        return 0
-      fi
+      for key in CMAKE_C_COMPILER_TARGET CMAKE_CXX_COMPILER_TARGET; do
+        target="$(awk -F= "/^${key}:/ {print \\$2; exit}" "$dir/CMakeCache.txt")"
+        if [ -n "$target" ]; then
+          echo "$target"
+          return 0
+        fi
+      done
     fi
     dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+win_args_has_target() {
+  local next_is_target=0
+  for arg in "$@"; do
+    if [ "$next_is_target" -eq 1 ]; then
+      return 0
+    fi
+    case "$arg" in
+      --target=*) return 0 ;;
+      -target) next_is_target=1 ;;
+    esac
   done
   return 1
 }
@@ -48,11 +64,6 @@ win_resolve_target() {
   target="$(win_find_args_target "$@" || true)"
   if [ -n "$target" ]; then
     echo "$target"
-    return 0
-  fi
-
-  if [ -n "${WIN_TARGET:-}" ]; then
-    echo "$WIN_TARGET"
     return 0
   fi
 
