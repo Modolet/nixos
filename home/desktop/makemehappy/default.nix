@@ -14,6 +14,11 @@
     file-roller
     evince
     loupe
+    obsidian
+    qqmusic
+    spotify
+    celluloid
+    yazi
   ];
 
 }

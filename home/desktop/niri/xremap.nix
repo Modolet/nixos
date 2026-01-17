@@ -113,7 +113,6 @@ let
 
     "Super-t" = launchCmd "kitty";
     "Super-m" = launchCmd "kitty musicfox";
-    "Super-e" = launchCmd "nautilus";
     "Super-c" = launchCmd "neovide";
     "Super-f" = launchCmd "firefox";
     "Ctrl-Shift-Esc" = launchCmd "kitty -e htop";

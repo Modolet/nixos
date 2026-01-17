@@ -9,14 +9,17 @@ let
   blurBlock = lib.concatStringsSep "\n" [
     "    blur {"
     "        on"
-    "        passes 4"
+    "        passes 2"
     "        radius 8"
-    "        noise 0.02"
+    "        noise 0.06"
     "    }"
   ];
-  niriConfigWithBlur = lib.replaceStrings [ "layout {\n" ] [ "layout {\n${blurBlock}\n" ] config.programs.niri.finalConfig;
+  niriConfigWithBlur =
+    lib.replaceStrings [ "layout {\n" ] [ "layout {\n${blurBlock}\n" ]
+      config.programs.niri.finalConfig;
   validatedNiriConfig =
-    inputs.niri.lib.internal.validated-config-for pkgs config.programs.niri.package niriConfigWithBlur;
+    inputs.niri.lib.internal.validated-config-for pkgs config.programs.niri.package
+      niriConfigWithBlur;
 in
 {
   imports = [
@@ -215,8 +218,10 @@ in
       };
   };
 
-  xdg.configFile.niri-config = lib.mkIf config.programs.niri.enable (lib.mkForce {
-    target = "niri/config.kdl";
-    source = validatedNiriConfig;
-  });
+  xdg.configFile.niri-config = lib.mkIf config.programs.niri.enable (
+    lib.mkForce {
+      target = "niri/config.kdl";
+      source = validatedNiriConfig;
+    }
+  );
 }

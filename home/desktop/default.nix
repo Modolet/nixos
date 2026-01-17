@@ -24,7 +24,6 @@ let
     text = ''
       set -euo pipefail
       dms restart
-      dms restart
 
       spec_file=${lib.escapeShellArg themeSpecFile}
       if [ ! -f "$spec_file" ]; then
@@ -165,8 +164,7 @@ in
   home.sessionVariables = {
     XDG_DATA_DIRS = xdgDataDirs;
   };
-  systemd.user.sessionVariables =
-    lib.filterAttrs (_: v: v != null) config.home.sessionVariables;
+  systemd.user.sessionVariables = lib.filterAttrs (_: v: v != null) config.home.sessionVariables;
 
   systemd.user.services.theme-switch-restore = {
     Unit = {

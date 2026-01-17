@@ -3,6 +3,7 @@
     enable = true;
     profiles.default = {
       isDefault = true;
+      extensions.force = true;
       settings = {
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "browser.tabs.drawInTitlebar" = true;
@@ -16,7 +17,9 @@
     targets = {
       firefox = {
         enable = true;
-        firefoxGnomeTheme.enable = true;
+        colors.enable = true;
+        colorTheme.enable = true;
+        # firefoxGnomeTheme.enable = false;
         profileNames = [ "default" ];
       };
     };
