@@ -1,5 +1,7 @@
 { pkgs, ... }:
 {
+  users.groups.plugdev = { };
+
   users.users.modolet = {
     isNormalUser = true;
     shell = pkgs.nushell;
