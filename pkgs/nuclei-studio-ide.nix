@@ -77,7 +77,7 @@ stdenvNoCC.mkDerivation rec {
     xorg.libXdamage
     xorg.libXcomposite
     xorg.libXinerama
-    xorg.libXss
+    (xorg.libXss or xorg.libXScrnSaver)
     xorg.libxcb
     xorg.libSM
     xorg.libICE
