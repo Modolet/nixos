@@ -132,7 +132,7 @@ _: {
         dontUnpack = true;
         outputHashMode = "recursive";
         outputHashAlgo = "sha256";
-        outputHash = pkgs.lib.fakeSha256;
+        outputHash = "sha256-4xm4///FQTt7bwzUIJJkLtDB1wnJjSszv4kPwo474Zg=";
         installPhase = ''
           export XWIN_ACCEPT_LICENSE=1
           export XWIN_CACHE_DIR="$TMPDIR/xwin-cache"
