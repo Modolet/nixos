@@ -23,11 +23,23 @@ _: {
           pkgs.llvmPackages_21
         else
           pkgs.llvmPackages;
+      clangdConfig = pkgs.writeTextFile {
+        name = "clangd-config-arm-none-eabi";
+        destination = "/clangd/config.yaml";
+        text = ''
+          CompileFlags:
+            Add:
+              - --target=arm-none-eabi
+              - --sysroot=${sysroot}
+        '';
+      };
       clangdWrapper = pkgs.runCommand "clangd-gcc-arm-embedded" { } ''
         mkdir -p "$out/bin"
         cat > "$out/bin/clangd" <<'EOF'
         #!${pkgs.runtimeShell}
-        exec ${llvmPkgs.clang-tools}/bin/clangd \
+        exec env XDG_CONFIG_HOME="${clangdConfig}" \
+          ${llvmPkgs.clang-tools}/bin/clangd \
+          --enable-config \
           --query-driver="${gccArm}/bin/arm-none-eabi-*" \
           "$@"
         EOF
