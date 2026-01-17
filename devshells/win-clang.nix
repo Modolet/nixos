@@ -18,33 +18,6 @@ _: {
         pkgs.ninja
         pkgs.pkg-config
       ];
-      clangdConfig = pkgs.writeTextDir "clangd/config.yaml" ''
-        CompileFlags:
-          Add:
-            - --target=x86_64-pc-windows-msvc
-            - --driver-mode=cl
-            - -fms-extensions
-            - -fms-compatibility
-            - -fms-compatibility-version=19.33
-            - -DWIN32
-            - -D_WINDOWS
-            - -DUNICODE
-            - -D_UNICODE
-            - -nostdinc
-            - -nostdinc++
-            - -isystem
-            - ${winSysroot}/VC/Tools/MSVC/${winCrtVersion}/include
-            - -isystem
-            - ${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/shared
-            - -isystem
-            - ${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/um
-            - -isystem
-            - ${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/ucrt
-            - -isystem
-            - ${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/winrt
-            - -isystem
-            - ${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/cppwinrt
-      '';
       winIncludePaths = [
         "${winSysroot}/VC/Tools/MSVC/${winCrtVersion}/include"
         "${winSysroot}/WindowsKits/10/Include/${winSdkVersion}/shared"
@@ -165,20 +138,6 @@ _: {
           linkWrapper
         ];
       };
-      clangdWrapper = pkgs.runCommand "clangd-win-clang" { } ''
-        mkdir -p "$out/bin"
-        cat > "$out/bin/clangd" <<'EOF'
-        #!${pkgs.runtimeShell}
-        exec env -u CPATH -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH -u OBJC_INCLUDE_PATH \
-          -u INCLUDE -u INCLUDE_PATH \
-          -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK -u NIX_LDFLAGS \
-          XDG_CONFIG_HOME="${clangdConfig}" \
-          ${llvmPkgs.clang-tools}/bin/clangd \
-          --query-driver="${winWrappers}/bin/cc,${llvmPkgs.clang-unwrapped}/bin/clang-cl" \
-          "$@"
-        EOF
-        chmod +x "$out/bin/clangd"
-      '';
       winSysroot = pkgs.stdenvNoCC.mkDerivation {
         pname = "xwin-sysroot";
         inherit (pkgs.xwin) version;
@@ -221,7 +180,7 @@ _: {
       packages.win-clang-sysroot = winSysroot;
       devShells.win-clang = pkgs.mkShell {
         stdenv = pkgs.stdenvNoCC;
-        packages = [ winWrappers clangdWrapper ] ++ winPackages ++ [ winSysroot ];
+        packages = [ winWrappers ] ++ winPackages ++ [ winSysroot ];
         XWIN_SYSROOT = "${winSysroot}";
         WIN_SDK_VERSION = winSdkVersion;
         WIN_CRT_VERSION = winCrtVersion;
