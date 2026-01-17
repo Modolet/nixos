@@ -20,11 +20,23 @@ _: {
       ];
       winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
         set(CMAKE_SYSTEM_NAME Windows)
-        set(WIN_TARGET "$ENV{WIN_TARGET}")
-        if(NOT WIN_TARGET)
-          set(WIN_TARGET "x86_64-pc-windows-msvc")
+        if(DEFINED WIN_TARGET)
+          set(WIN_TARGET_INPUT "''${WIN_TARGET}")
+        elseif(DEFINED ENV{WIN_TARGET})
+          set(WIN_TARGET_INPUT "$ENV{WIN_TARGET}")
+        else()
+          set(WIN_TARGET_INPUT "x86_64-pc-windows-msvc")
         endif()
 
+        if(WIN_TARGET_INPUT STREQUAL "i686")
+          set(WIN_TARGET_TRIPLE "i686-pc-windows-msvc")
+        elseif(WIN_TARGET_INPUT STREQUAL "x86_64")
+          set(WIN_TARGET_TRIPLE "x86_64-pc-windows-msvc")
+        else()
+          set(WIN_TARGET_TRIPLE "''${WIN_TARGET_INPUT}")
+        endif()
+
+        set(WIN_TARGET "''${WIN_TARGET_TRIPLE}" CACHE STRING "Windows target triple" FORCE)
         if(WIN_TARGET MATCHES "i686")
           set(WIN_SDK_ARCH "x86")
           set(MACHINE_FLAG "/machine:x86")
@@ -57,9 +69,14 @@ _: {
         set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}")
         set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}")
         set(LINKER_FLAGS "''${LINKER_FLAGS} ''${MACHINE_FLAG}")
-        set(CMAKE_EXE_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
-        set(CMAKE_SHARED_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
-        set(CMAKE_MODULE_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
+        foreach(flag_var IN ITEMS CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS)
+          if(DEFINED ''${flag_var})
+            set(_win_linker_flags "''${''${flag_var}}")
+          else()
+            set(_win_linker_flags "")
+          endif()
+          set(''${flag_var} "''${_win_linker_flags} ''${LINKER_FLAGS}" CACHE STRING "Windows linker flags" FORCE)
+        endforeach()
 
         set(CMAKE_FIND_ROOT_PATH "''${XWIN_SYSROOT}")
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -76,6 +93,11 @@ _: {
         WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
         WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
         XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
+
+        case "$WIN_TARGET" in
+          i686) WIN_TARGET="i686-pc-windows-msvc" ;;
+          x86_64) WIN_TARGET="x86_64-pc-windows-msvc" ;;
+        esac
 
         case "$WIN_TARGET" in
           i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
