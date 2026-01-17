@@ -4,6 +4,7 @@
     ./core
     ./programs
     ./network
+    ./bluetooth
   ];
   nixpkgs = {
     config.allowUnfree = true;

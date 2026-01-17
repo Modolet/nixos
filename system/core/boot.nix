@@ -25,11 +25,13 @@
     loader = {
       systemd-boot.enable = false;
       grub = {
+        theme = pkgs.catppuccin-grub;
         enable = true;
         device = "nodev";
         efiSupport = true;
+        # efiInstallAsRemovable = true;
       };
-      efi.canTouchEfiVariables = false;
+      efi.canTouchEfiVariables = true;
     };
 
     plymouth.enable = true;

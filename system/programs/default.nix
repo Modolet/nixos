@@ -5,7 +5,10 @@
     ./virtualization.nix
   ];
 
-  environment.systemPackages = [
-    pkgs.probe-rs-tools
+  environment.systemPackages = with pkgs; [
+    probe-rs-tools
+    usbutils
+    pciutils
+    openlist
   ];
 }
