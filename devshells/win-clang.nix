@@ -3,6 +3,8 @@
   perSystem =
     { pkgs, ... }:
     let
+      winSdkVersion = "10.0.26100";
+      winCrtVersion = "14.44.17.14";
       winPackages = with pkgs; [
         clang
         lld
@@ -29,6 +31,8 @@
             --cache-dir "$XWIN_CACHE_DIR" \
             --arch x86 --arch x86_64 \
             --variant desktop \
+            --sdk-version ${winSdkVersion} \
+            --crt-version ${winCrtVersion} \
             --include-debug-runtime \
             download
 
@@ -36,6 +40,8 @@
             --cache-dir "$XWIN_CACHE_DIR" \
             --arch x86 --arch x86_64 \
             --variant desktop \
+            --sdk-version ${winSdkVersion} \
+            --crt-version ${winCrtVersion} \
             splat \
             --output "$out" \
             --use-winsysroot-style \
