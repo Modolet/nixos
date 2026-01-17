@@ -20,84 +20,51 @@ _: {
       ];
       winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
         set(CMAKE_SYSTEM_NAME Windows)
-        if(DEFINED WIN_TARGET)
-          set(WIN_TARGET_INPUT "''${WIN_TARGET}")
-        elseif(DEFINED ENV{WIN_TARGET})
-          set(WIN_TARGET_INPUT "$ENV{WIN_TARGET}")
-        else()
-          set(WIN_TARGET_INPUT "x86_64-pc-windows-msvc")
-        endif()
-
-        if(WIN_TARGET_INPUT STREQUAL "i686")
-          set(WIN_TARGET_TRIPLE "i686-pc-windows-msvc")
-        elseif(WIN_TARGET_INPUT STREQUAL "x86_64")
-          set(WIN_TARGET_TRIPLE "x86_64-pc-windows-msvc")
-        else()
-          set(WIN_TARGET_TRIPLE "''${WIN_TARGET_INPUT}")
-        endif()
-
-        set(WIN_TARGET "''${WIN_TARGET_TRIPLE}" CACHE STRING "Windows target triple" FORCE)
-        if(WIN_TARGET MATCHES "i686")
-          set(WIN_SDK_ARCH "x86")
-          set(MACHINE_FLAG "/machine:x86")
-        elseif(WIN_TARGET MATCHES "x86_64")
-          set(WIN_SDK_ARCH "x86_64")
-          set(MACHINE_FLAG "/machine:x64")
-        else()
-          message(FATAL_ERROR "Unsupported WIN_TARGET: ''${WIN_TARGET}")
-        endif()
-
-        set(WIN_SDK_VERSION "$ENV{WIN_SDK_VERSION}")
-        set(WIN_CRT_VERSION "$ENV{WIN_CRT_VERSION}")
-        set(XWIN_SYSROOT "$ENV{XWIN_SYSROOT}")
-        set(XWIN_CRT_DIR "''${XWIN_SYSROOT}/VC/Tools/MSVC/''${WIN_CRT_VERSION}")
-        set(XWIN_SDK_DIR "''${XWIN_SYSROOT}/WindowsKits/10")
-
-        set(CMAKE_C_COMPILER clang-cl)
-        set(CMAKE_CXX_COMPILER clang-cl)
-        set(CMAKE_C_LINK_EXECUTABLE lld-link)
-        set(CMAKE_CXX_LINK_EXECUTABLE lld-link)
+        set(CMAKE_C_COMPILER cc)
+        set(CMAKE_CXX_COMPILER c++)
         set(CMAKE_LINKER lld-link)
         set(CMAKE_RC_COMPILER llvm-rc)
-
-        set(CLANG_MSVC_FLAGS "/vctoolsdir \"''${XWIN_CRT_DIR}\" /winsdkdir \"''${XWIN_SDK_DIR}\" --target=''${WIN_TARGET}")
-        set(CMAKE_C_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
-        set(CMAKE_CXX_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
-        set(CMAKE_RC_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
-
-        set(LINKER_FLAGS "-libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}")
-        set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}")
-        set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}")
-        set(LINKER_FLAGS "''${LINKER_FLAGS} ''${MACHINE_FLAG}")
-        foreach(flag_var IN ITEMS CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS)
-          if(DEFINED ''${flag_var})
-            set(_win_linker_flags "''${''${flag_var}}")
-          else()
-            set(_win_linker_flags "")
-          endif()
-          set(''${flag_var} "''${_win_linker_flags} ''${LINKER_FLAGS}" CACHE STRING "Windows linker flags" FORCE)
-        endforeach()
-
-        set(CMAKE_FIND_ROOT_PATH "''${XWIN_SYSROOT}")
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+        set(CMAKE_AR llvm-lib)
       '';
       winWrappers = pkgs.runCommand "win-clang-wrappers" { } ''
         mkdir -p "$out/bin"
         cat > "$out/bin/cc" <<'EOF'
         #!${pkgs.runtimeShell}
         set -euo pipefail
-        WIN_TARGET="''${WIN_TARGET:-x86_64-pc-windows-msvc}"
         WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
         WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
         XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
 
-        case "$WIN_TARGET" in
-          i686) WIN_TARGET="i686-pc-windows-msvc" ;;
-          x86_64) WIN_TARGET="x86_64-pc-windows-msvc" ;;
-        esac
+        resolve_win_target() {
+          if [ -n "''${WIN_TARGET:-}" ]; then
+            echo "$WIN_TARGET"
+            return
+          fi
+          local dir="$PWD"
+          while [ "$dir" != "/" ]; do
+            if [ -f "$dir/CMakeCache.txt" ]; then
+              local target
+              target="$(awk -F= '/^WIN_TARGET:STRING=/{print $2; exit}' "$dir/CMakeCache.txt")"
+              if [ -n "$target" ]; then
+                echo "$target"
+                return
+              fi
+            fi
+            dir="$(dirname "$dir")"
+          done
+          echo "x86_64-pc-windows-msvc"
+        }
+
+        normalize_win_target() {
+          case "$1" in
+            i686) echo "i686-pc-windows-msvc" ;;
+            x86_64) echo "x86_64-pc-windows-msvc" ;;
+            *) echo "$1" ;;
+          esac
+        }
+
+        WIN_TARGET="$(normalize_win_target "$(resolve_win_target)")"
+        export WIN_TARGET
 
         case "$WIN_TARGET" in
           i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
@@ -107,6 +74,28 @@ _: {
 
         XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
         XWIN_SDK_DIR="$XWIN_SYSROOT/WindowsKits/10"
+
+        include_paths=(
+          "$XWIN_CRT_DIR/include"
+          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/shared"
+          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/um"
+          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/ucrt"
+          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/winrt"
+          "$XWIN_SDK_DIR/Include/$WIN_SDK_VERSION/cppwinrt"
+        )
+        lib_paths=(
+          "$XWIN_CRT_DIR/lib/$WIN_SDK_ARCH"
+          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/ucrt/$WIN_SDK_ARCH"
+          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/um/$WIN_SDK_ARCH"
+        )
+        join_by() {
+          local IFS="$1"
+          shift
+          echo "$*"
+        }
+        INCLUDE="$(join_by ';' "''${include_paths[@]}")''${INCLUDE:+;$INCLUDE}"
+        LIB="$(join_by ';' "''${lib_paths[@]}")''${LIB:+;$LIB}"
+        export INCLUDE LIB
 
         needs_link=1
         for arg in "$@"; do
@@ -125,7 +114,7 @@ _: {
           )
         fi
 
-        exec clang-cl \
+        exec ${llvmPkgs.clang-unwrapped}/bin/clang-cl \
           /vctoolsdir "$XWIN_CRT_DIR" \
           /winsdkdir "$XWIN_SDK_DIR" \
           --target="$WIN_TARGET" \
@@ -146,6 +135,87 @@ _: {
         exec cc "$@"
         EOF
         chmod +x "$out/bin/cl"
+
+        cat > "$out/bin/lld-link" <<'EOF'
+        #!${pkgs.runtimeShell}
+        set -euo pipefail
+        WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
+        WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
+        XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
+
+        resolve_win_target() {
+          if [ -n "''${WIN_TARGET:-}" ]; then
+            echo "$WIN_TARGET"
+            return
+          fi
+          local dir="$PWD"
+          while [ "$dir" != "/" ]; do
+            if [ -f "$dir/CMakeCache.txt" ]; then
+              local target
+              target="$(awk -F= '/^WIN_TARGET:STRING=/{print $2; exit}' "$dir/CMakeCache.txt")"
+              if [ -n "$target" ]; then
+                echo "$target"
+                return
+              fi
+            fi
+            dir="$(dirname "$dir")"
+          done
+          echo "x86_64-pc-windows-msvc"
+        }
+
+        normalize_win_target() {
+          case "$1" in
+            i686) echo "i686-pc-windows-msvc" ;;
+            x86_64) echo "x86_64-pc-windows-msvc" ;;
+            *) echo "$1" ;;
+          esac
+        }
+
+        WIN_TARGET="$(normalize_win_target "$(resolve_win_target)")"
+        export WIN_TARGET
+
+        case "$WIN_TARGET" in
+          i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
+          x86_64*) WIN_SDK_ARCH="x86_64"; MACHINE_FLAG="/machine:x64" ;;
+          *) echo "Unsupported WIN_TARGET: $WIN_TARGET" >&2; exit 1 ;;
+        esac
+
+        XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
+        XWIN_SDK_DIR="$XWIN_SYSROOT/WindowsKits/10"
+        lib_paths=(
+          "$XWIN_CRT_DIR/lib/$WIN_SDK_ARCH"
+          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/ucrt/$WIN_SDK_ARCH"
+          "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/um/$WIN_SDK_ARCH"
+        )
+        join_by() {
+          local IFS="$1"
+          shift
+          echo "$*"
+        }
+        LIB="$(join_by ';' "''${lib_paths[@]}")''${LIB:+;$LIB}"
+        export LIB
+
+        extra_args=(
+          "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}"
+          "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}"
+          "/libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}"
+        )
+        case " $* " in
+          *" /machine:"*) ;;
+          *) extra_args+=("$MACHINE_FLAG") ;;
+        esac
+
+        exec ${llvmPkgs.lld}/bin/lld-link \
+          "''${extra_args[@]}" \
+          "$@"
+        EOF
+        chmod +x "$out/bin/lld-link"
+
+        cat > "$out/bin/link" <<'EOF'
+        #!${pkgs.runtimeShell}
+        exec lld-link "$@"
+        EOF
+        chmod +x "$out/bin/link"
       '';
       winSysroot = pkgs.stdenvNoCC.mkDerivation {
         pname = "xwin-sysroot";
@@ -191,7 +261,6 @@ _: {
         stdenv = pkgs.stdenvNoCC;
         packages = [ winWrappers ] ++ winPackages ++ [ winSysroot ];
         XWIN_SYSROOT = "${winSysroot}";
-        WIN_TARGET = "x86_64-pc-windows-msvc";
         WIN_SDK_VERSION = winSdkVersion;
         WIN_CRT_VERSION = winCrtVersion;
         CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
