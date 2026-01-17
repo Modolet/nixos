@@ -13,7 +13,7 @@
     programs.dank-material-shell = {
       enable = config.desktopShell == "dms";
       niri = {
-        enableSpawn = true;
+        enableSpawn = false;
         enableKeybinds = false;
         includes.enable = false;
       };
