@@ -13,9 +13,14 @@
   at-spi2-atk,
   at-spi2-core,
   dbus,
+  dtc,
+  e2fsprogs,
   libxkbcommon,
+  libedit,
   fontconfig,
   freetype,
+  libgpg-error,
+  ncurses5,
   zlib,
   nss,
   nspr,
@@ -56,9 +61,14 @@ stdenvNoCC.mkDerivation rec {
     at-spi2-atk
     at-spi2-core
     dbus
+    dtc
+    e2fsprogs.out
     libxkbcommon
+    libedit
     fontconfig
     freetype
+    libgpg-error
+    ncurses5
     zlib
     nss
     nspr
@@ -85,6 +95,10 @@ stdenvNoCC.mkDerivation rec {
     xorg.libxcb
     xorg.libSM
     xorg.libICE
+  ];
+
+  autoPatchelfIgnoreMissingDeps = [
+    "libc.so.8"
   ];
 
   installPhase = ''
