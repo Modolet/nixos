@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:
@@ -13,75 +12,88 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
-
-  boot.initrd.availableKernelModules = [
-    "nvme"
-    "xhci_pci"
-    "ahci"
-    "thunderbolt"
-    "usbhid"
-    "uas"
-    "sd_mod"
-  ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
-
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
-    fsType = "btrfs";
-    options = [
-      "subvol=@"
-      "compress=zstd"
-      "noatime"
-      "ssd"
+  boot = {
+    initrd.kernelModules = [
+      "usbhid"
+      "hid-generic"
+      "hid"
     ];
+    kernelModules = [
+      "kvm-amd"
+      "kvm-intel"
+      "usbhid"
+      "hid-generic"
+      "hid"
+    ];
+    initrd.availableKernelModules = [
+      "nvme"
+      "xhci_pci"
+      "ahci"
+      "thunderbolt"
+      "usbhid"
+      "uas"
+      "sd_mod"
+    ];
+    extraModulePackages = [ ];
   };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
+      fsType = "btrfs";
+      options = [
+        "subvol=@"
+        "compress=zstd"
+        "noatime"
+        "ssd"
+      ];
+    };
 
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
-    fsType = "btrfs";
-    options = [
-      "subvol=@home"
-      "compress=zstd"
-      "noatime"
-      "ssd"
-    ];
-  };
+    "/home" = {
+      device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
+      fsType = "btrfs";
+      options = [
+        "subvol=@home"
+        "compress=zstd"
+        "noatime"
+        "ssd"
+      ];
+    };
 
-  fileSystems."/home/modolet/workspace" = {
-    device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
-    fsType = "btrfs";
-    options = [
-      "subvol=@workspace"
-      "compress=zstd"
-      "noatime"
-      "ssd"
-    ];
-  };
+    "/home/modolet/workspace" = {
+      device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
+      fsType = "btrfs";
+      options = [
+        "subvol=@workspace"
+        "compress=zstd"
+        "noatime"
+        "ssd"
+      ];
+    };
 
-  fileSystems."/nix" = {
-    device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
-    fsType = "btrfs";
-    options = [
-      "subvol=@nix"
-      "compress=zstd"
-      "noatime"
-      "ssd"
-    ];
-  };
+    "/nix" = {
+      device = "/dev/disk/by-uuid/c9e4c904-8503-47fb-9a40-36e92d521b57";
+      fsType = "btrfs";
+      options = [
+        "subvol=@nix"
+        "compress=zstd"
+        "noatime"
+        "ssd"
+      ];
+    };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/3DC9-0495";
-    fsType = "vfat";
-    options = [
-      "fmask=0022"
-      "dmask=0022"
-    ];
+    "/boot" = {
+      device = "/dev/disk/by-uuid/3DC9-0495";
+      fsType = "vfat";
+      options = [
+        "fmask=0022"
+        "dmask=0022"
+      ];
+    };
   };
 
   swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

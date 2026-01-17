@@ -1,7 +1,10 @@
 { pkgs, ... }:
 {
   virtualisation = {
-    docker.enable = true;
+    docker = {
+      enable = true;
+      storageDriver = "btrfs";
+    };
     podman.enable = true;
     libvirtd = {
       enable = true;

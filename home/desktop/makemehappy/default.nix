@@ -6,12 +6,14 @@
 
   home.packages = with pkgs; [
     neovide
-    vlc
+    kdePackages.kdenlive
     obs-studio
     clash-verge-rev
     wpsoffice-cn
     wemeet
     file-roller
+    evince
+    loupe
   ];
 
 }
