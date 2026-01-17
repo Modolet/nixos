@@ -253,6 +253,7 @@ let
         ensure_state
         mode="$(jq -r '.mode // empty' "$state_file")"
         wallpaper="$(jq -r '.wallpaper // empty' "$state_file")"
+        applied_wallpaper="$(jq -r '.appliedWallpaper // empty' "$state_file")"
         pre_monet_theme="$(jq -r '.preMonetTheme // empty' "$state_file")"
       }
 
@@ -261,12 +262,14 @@ let
         jq -n \
           --arg mode "$mode" \
           --arg wallpaper "$wallpaper" \
+          --arg appliedWallpaper "$applied_wallpaper" \
           --arg preMonetTheme "$pre_monet_theme" \
           '{
             mode: $mode,
             wallpaper: $wallpaper
           }
-          + if ($preMonetTheme | length) > 0 then { preMonetTheme: $preMonetTheme } else {} end' \
+          + if ($preMonetTheme | length) > 0 then { preMonetTheme: $preMonetTheme } else {} end
+          + if ($appliedWallpaper | length) > 0 then { appliedWallpaper: $appliedWallpaper } else {} end' \
           >"$state_file"
       }
 
@@ -467,6 +470,14 @@ let
                 theme-switch "$pre_monet_theme" || true
               fi
             fi
+          fi
+        fi
+
+        if [ "$applied_wallpaper" != "$wallpaper" ]; then
+          applied_wallpaper="$wallpaper"
+          write_state
+          if command -v niri >/dev/null 2>&1; then
+            niri msg action load-config-file >/dev/null 2>&1 || true
           fi
         fi
       }
