@@ -5,8 +5,10 @@
     shell = pkgs.nushell;
     extraGroups = [
       "adbusers"
+      "docker"
       "input"
       "uinput"
+      "libvirtd"
       "networkmanager"
       "plugdev"
       "video"
