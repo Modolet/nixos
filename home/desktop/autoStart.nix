@@ -8,6 +8,8 @@ let
     text = ''
       set -euo pipefail
       systemctl --user restart xremap.service || true
+      nohup clash-verge >/dev/null 2>&1 < /dev/null &
+      nohup OpenList server >/dev/null 2>&1 < /dev/null &
     '';
 
   };
