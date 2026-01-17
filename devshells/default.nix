@@ -10,6 +10,15 @@
           rustfmt
           clippy
           rust-analyzer
+          pkg-config
+          systemd.dev
+          wayland
+          wayland-protocols
+          libxkbcommon
+          xorg.libX11
+          xorg.libXcursor
+          xorg.libXi
+          xorg.libXrandr
         ];
       };
       devShells.clang = pkgs.mkShell {
