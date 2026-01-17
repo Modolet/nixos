@@ -88,10 +88,29 @@ _: {
           "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}"
           "/libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}"
         )
+        default_libs=(
+          kernel32.lib
+          user32.lib
+          gdi32.lib
+          winspool.lib
+          shell32.lib
+          ole32.lib
+          oleaut32.lib
+          uuid.lib
+          comdlg32.lib
+          advapi32.lib
+        )
         case " $* " in
           *" /machine:"*) ;;
           *) extra_args+=("''${MACHINE_FLAG}") ;;
         esac
+        if ! win_args_has_nodefaultlib "$@"; then
+          for lib in "''${default_libs[@]}"; do
+            if ! win_args_has_lib "$lib" "$@"; then
+              extra_args+=("$lib")
+            fi
+          done
+        fi
 
         exec "''${LLD_LINK}" \
           "''${extra_args[@]}" \

@@ -4,6 +4,15 @@ win_join_by() {
   echo "$*"
 }
 
+win_normalize_list() {
+  local list="$1"
+  if [ -z "$list" ]; then
+    echo ""
+    return 0
+  fi
+  echo "${list//:/;}"
+}
+
 win_find_cache_target() {
   local dir="$PWD"
   while [ "$dir" != "/" ]; do
@@ -18,6 +27,26 @@ win_find_cache_target() {
       done
     fi
     dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+win_args_has_nodefaultlib() {
+  for arg in "$@"; do
+    case "${arg,,}" in
+      /nodefaultlib*|-nodefaultlib*) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+win_args_has_lib() {
+  local needle="${1,,}"
+  shift
+  for arg in "$@"; do
+    if [ "${arg,,}" = "$needle" ]; then
+      return 0
+    fi
   done
   return 1
 }
@@ -116,8 +145,32 @@ win_setup_include_lib() {
     "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/ucrt/$WIN_SDK_ARCH"
     "$XWIN_SDK_DIR/Lib/$WIN_SDK_VERSION/um/$WIN_SDK_ARCH"
   )
-  INCLUDE="$(win_join_by ';' "${include_paths[@]}")${INCLUDE:+;$INCLUDE}"
-  LIB="$(win_join_by ';' "${lib_paths[@]}")${LIB:+;$LIB}"
+  local include_joined
+  local lib_joined
+  local extra_include
+  local extra_lib
+  local include_env
+  local lib_env
+  include_joined="$(win_join_by ';' "${include_paths[@]}")"
+  lib_joined="$(win_join_by ';' "${lib_paths[@]}")"
+  extra_include="$(win_normalize_list "${CMAKE_INCLUDE_PATH:-}")"
+  extra_lib="$(win_normalize_list "${CMAKE_LIBRARY_PATH:-}")"
+  include_env="${INCLUDE:-}"
+  lib_env="${LIB:-}"
+  INCLUDE="$include_joined"
+  if [ -n "$extra_include" ]; then
+    INCLUDE="$INCLUDE;$extra_include"
+  fi
+  if [ -n "$include_env" ]; then
+    INCLUDE="$INCLUDE;$include_env"
+  fi
+  LIB="$lib_joined"
+  if [ -n "$extra_lib" ]; then
+    LIB="$LIB;$extra_lib"
+  fi
+  if [ -n "$lib_env" ]; then
+    LIB="$LIB;$lib_env"
+  fi
   export INCLUDE LIB
 }
 
