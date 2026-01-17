@@ -13,6 +13,10 @@
   networking.hostName = "nixos_to_go";
   boot.blacklistedKernelModules = [ "nouveau" ];
 
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", KERNEL=="usb1-port11", ATTR{authorized}="0"
+  '';
+
   security = {
     forcePageTableIsolation = true;
     protectKernelImage = true;
