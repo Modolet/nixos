@@ -39,7 +39,8 @@
             splat \
             --output "$out" \
             --use-winsysroot-style \
-            --include-debug-libs
+            --include-debug-libs \
+            --copy
         '';
       };
     in
