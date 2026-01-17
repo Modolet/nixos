@@ -27,7 +27,9 @@ _: {
         mkdir -p "$out/bin"
         cat > "$out/bin/clangd" <<'EOF'
         #!${pkgs.runtimeShell}
-        exec ${llvmPkgs.clang-tools}/bin/clangd \
+        exec env -u CPATH -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH -u OBJC_INCLUDE_PATH \
+          -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK -u NIX_LDFLAGS \
+          ${llvmPkgs.clang-tools}/bin/clangd \
           --query-driver="${gccArm}/bin/arm-none-eabi-*" \
           "$@"
         EOF
