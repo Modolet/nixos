@@ -36,6 +36,7 @@ _: {
     in
     {
       devShells.gcc-arm-embedded = pkgs.mkShell {
+        stdenv = pkgs.stdenvNoCC;
         packages = [
           gccArm
           pkgs.cmake
@@ -46,6 +47,9 @@ _: {
         C_INCLUDE_PATH = cIncludePath;
         CPLUS_INCLUDE_PATH = cxxIncludePath;
         CPATH = cxxIncludePath;
+        NIX_CFLAGS_COMPILE = "";
+        NIX_CFLAGS_LINK = "";
+        NIX_LDFLAGS = "";
       };
     };
 }
