@@ -19,23 +19,25 @@
     kernelParams = [
       "systemd.show_status=auto"
       "rd.udev.log_level=3"
-      # "plymouth.use-simpledrm"
+      "plymouth.use-simpledrm"
     ];
 
     loader = {
       systemd-boot.enable = false;
-      grub.enable = true;
-      grub.device = "nodev";
-      grub.efiSupport = true;
+      grub = {
+        enable = true;
+        device = "nodev";
+        efiSupport = true;
+      };
       efi.canTouchEfiVariables = false;
     };
 
-    plymouth.enable = false;
+    plymouth.enable = true;
 
-    # tmp = {
-    #   useTmpfs = true;
-    #   cleanOnBoot = true;
-    # };
+    tmp = {
+      useTmpfs = true;
+      cleanOnBoot = true;
+    };
   };
   systemd.services.nix-daemon = {
     environment = {

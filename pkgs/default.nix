@@ -13,7 +13,6 @@ in
         overlays = [
           overlays
           packages
-          inputs.nur.overlay
         ];
         config = { };
       };

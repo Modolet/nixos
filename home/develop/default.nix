@@ -6,12 +6,11 @@
     rustup
     gcc-arm-embedded
     cargo-xwin
-    llvmPackages.bintools
     cmake
     ninja
     gcc
     stm32cubemx
-    probe-rs
+    probe-rs-tools
     pyocd
     stlink
     jetbrains.clion

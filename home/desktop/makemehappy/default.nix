@@ -11,5 +11,7 @@
     clash-verge-rev
     wpsoffice-cn
     wemeet
+    file-roller
   ];
+
 }
