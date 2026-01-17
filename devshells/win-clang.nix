@@ -16,14 +16,48 @@
       ];
       winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
         set(CMAKE_SYSTEM_NAME Windows)
+        set(WIN_TARGET "$ENV{WIN_TARGET}")
+        if(NOT WIN_TARGET)
+          set(WIN_TARGET "x86_64-pc-windows-msvc")
+        endif()
+
+        if(WIN_TARGET MATCHES "i686")
+          set(WIN_SDK_ARCH "x86")
+          set(MACHINE_FLAG "/machine:x86")
+        elseif(WIN_TARGET MATCHES "x86_64")
+          set(WIN_SDK_ARCH "x86_64")
+          set(MACHINE_FLAG "/machine:x64")
+        else()
+          message(FATAL_ERROR "Unsupported WIN_TARGET: ''${WIN_TARGET}")
+        endif()
+
+        set(WIN_SDK_VERSION "$ENV{WIN_SDK_VERSION}")
+        set(WIN_CRT_VERSION "$ENV{WIN_CRT_VERSION}")
+        set(XWIN_SYSROOT "$ENV{XWIN_SYSROOT}")
+        set(XWIN_CRT_DIR "''${XWIN_SYSROOT}/VC/Tools/MSVC/''${WIN_CRT_VERSION}")
+        set(XWIN_SDK_DIR "''${XWIN_SYSROOT}/Windows Kits/10")
+
         set(CMAKE_C_COMPILER clang-cl)
         set(CMAKE_CXX_COMPILER clang-cl)
+        set(CMAKE_C_LINK_EXECUTABLE lld-link)
+        set(CMAKE_CXX_LINK_EXECUTABLE lld-link)
         set(CMAKE_LINKER lld-link)
         set(CMAKE_RC_COMPILER llvm-rc)
-        set(CMAKE_C_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
-        set(CMAKE_CXX_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
-        set(CMAKE_EXE_LINKER_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
-        set(CMAKE_FIND_ROOT_PATH "$ENV{XWIN_SYSROOT}")
+
+        set(CLANG_MSVC_FLAGS "/vctoolsdir \"''${XWIN_CRT_DIR}\" /winsdkdir \"''${XWIN_SDK_DIR}\" --target=''${WIN_TARGET}")
+        set(CMAKE_C_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
+        set(CMAKE_CXX_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
+        set(CMAKE_RC_FLAGS_INIT "''${CLANG_MSVC_FLAGS}")
+
+        set(LINKER_FLAGS "-libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}")
+        set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}")
+        set(LINKER_FLAGS "''${LINKER_FLAGS} -libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}")
+        set(LINKER_FLAGS "''${LINKER_FLAGS} ''${MACHINE_FLAG}")
+        set(CMAKE_EXE_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
+        set(CMAKE_SHARED_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
+        set(CMAKE_MODULE_LINKER_FLAGS_INIT "''${LINKER_FLAGS}")
+
+        set(CMAKE_FIND_ROOT_PATH "''${XWIN_SYSROOT}")
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -33,22 +67,57 @@
         mkdir -p "$out/bin"
         cat > "$out/bin/cc" <<'EOF'
         #!${pkgs.runtimeShell}
-        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
-          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        set -euo pipefail
+        WIN_TARGET="''${WIN_TARGET:-x86_64-pc-windows-msvc}"
+        WIN_SDK_VERSION="''${WIN_SDK_VERSION:-${winSdkVersion}}"
+        WIN_CRT_VERSION="''${WIN_CRT_VERSION:-${winCrtVersion}}"
+        XWIN_SYSROOT="''${XWIN_SYSROOT:?XWIN_SYSROOT not set}"
+
+        case "$WIN_TARGET" in
+          i686*) WIN_SDK_ARCH="x86"; MACHINE_FLAG="/machine:x86" ;;
+          x86_64*) WIN_SDK_ARCH="x86_64"; MACHINE_FLAG="/machine:x64" ;;
+          *) echo "Unsupported WIN_TARGET: $WIN_TARGET" >&2; exit 1 ;;
+        esac
+
+        XWIN_CRT_DIR="$XWIN_SYSROOT/VC/Tools/MSVC/$WIN_CRT_VERSION"
+        XWIN_SDK_DIR="$XWIN_SYSROOT/Windows Kits/10"
+
+        needs_link=1
+        for arg in "$@"; do
+          case "$arg" in
+            -c|/c) needs_link=0 ;;
+          esac
+        done
+        link_args=()
+        if [ "$needs_link" -eq 1 ]; then
+          link_args=(
+            /link
+            "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/um/''${WIN_SDK_ARCH}"
+            "/libpath:''${XWIN_SDK_DIR}/Lib/''${WIN_SDK_VERSION}/ucrt/''${WIN_SDK_ARCH}"
+            "/libpath:''${XWIN_CRT_DIR}/lib/''${WIN_SDK_ARCH}"
+            "$MACHINE_FLAG"
+          )
+        fi
+
+        exec clang-cl \
+          /vctoolsdir "$XWIN_CRT_DIR" \
+          /winsdkdir "$XWIN_SDK_DIR" \
+          --target="$WIN_TARGET" \
+          -fuse-ld=lld \
+          "$@" \
+          "''${link_args[@]}"
         EOF
         chmod +x "$out/bin/cc"
 
         cat > "$out/bin/c++" <<'EOF'
         #!${pkgs.runtimeShell}
-        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
-          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        exec cc "$@"
         EOF
         chmod +x "$out/bin/c++"
 
         cat > "$out/bin/cl" <<'EOF'
         #!${pkgs.runtimeShell}
-        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
-          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        exec cc "$@"
         EOF
         chmod +x "$out/bin/cl"
       '';
@@ -95,6 +164,8 @@
         packages = [ winWrappers ] ++ winPackages ++ [ winSysroot ];
         XWIN_SYSROOT = "${winSysroot}";
         WIN_TARGET = "x86_64-pc-windows-msvc";
+        WIN_SDK_VERSION = winSdkVersion;
+        WIN_CRT_VERSION = winCrtVersion;
         CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
         CC = "cc";
         CXX = "c++";
