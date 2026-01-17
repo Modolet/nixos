@@ -14,12 +14,12 @@
       ];
       winSysroot = pkgs.stdenvNoCC.mkDerivation {
         pname = "xwin-sysroot";
-        version = pkgs.xwin.version;
+        inherit (pkgs.xwin) version;
         nativeBuildInputs = [ pkgs.xwin ];
         dontUnpack = true;
-        __noChroot = true;
-        preferLocalBuild = true;
-        allowSubstitutes = false;
+        outputHashMode = "recursive";
+        outputHashAlgo = "sha256";
+        outputHash = pkgs.lib.fakeSha256;
         installPhase = ''
           export XWIN_ACCEPT_LICENSE=1
           export XWIN_CACHE_DIR="$TMPDIR/xwin-cache"
@@ -44,6 +44,7 @@
       };
     in
     {
+      packages.win-clang-sysroot = winSysroot;
       devShells.win-clang = pkgs.mkShell {
         packages = winPackages ++ [ winSysroot ];
         XWIN_SYSROOT = "${winSysroot}";
