@@ -22,6 +22,10 @@
             xorg.libXrandr
             xorg.libxcb
             vulkan-loader
+            mesa
+            libglvnd
+            egl-wayland
+            xorg.libXext
           ];
         in
         pkgs.mkShell {
