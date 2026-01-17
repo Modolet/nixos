@@ -2,8 +2,22 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
+let
+  blurBlock = lib.concatStringsSep "\n" [
+    "    blur {"
+    "        on"
+    "        passes 4"
+    "        radius 8"
+    "        noise 0.02"
+    "    }"
+  ];
+  niriConfigWithBlur = lib.replaceStrings [ "layout {\n" ] [ "layout {\n${blurBlock}\n" ] config.programs.niri.finalConfig;
+  validatedNiriConfig =
+    inputs.niri.lib.internal.validated-config-for pkgs config.programs.niri.package niriConfigWithBlur;
+in
 {
   imports = [
     # ./animations.nix
@@ -200,4 +214,9 @@
         };
       };
   };
+
+  xdg.configFile.niri-config = lib.mkIf config.programs.niri.enable (lib.mkForce {
+    target = "niri/config.kdl";
+    source = validatedNiriConfig;
+  });
 }

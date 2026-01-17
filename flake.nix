@@ -15,6 +15,10 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.niri-unstable = {
+        url = "github:visualglitch91/niri/feat/blur";
+        flake = false;
+      };
     };
     stylix = {
       url = "github:nix-community/stylix";
@@ -28,6 +32,10 @@
     dankMaterialShell.url = "github:AvengeMedia/DankMaterialShell";
     quickshell = {
       url = "git+https://git.outfoxxed.me/quickshell/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    winapps = {
+      url = "github:winapps-org/winapps";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

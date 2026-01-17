@@ -80,11 +80,6 @@ let
 
   pythonRecolor = pkgs.python3.withPackages (ps: with ps; [ pillow tqdm ]);
   recolorScript = ../../tools/icon-recolor.py;
-  niriPackage =
-    if config ? programs && config.programs ? niri && config.programs.niri ? package then
-      config.programs.niri.package
-    else
-      pkgs.niri;
 
   mkMonetScheme =
     name: image:
@@ -211,9 +206,6 @@ let
     cacheDir = cfg.cacheDir;
     swww = cfg.swww;
     recolor = cfg.recolor;
-    focusBlur = {
-      swww = cfg.focusBlur.swww;
-    };
     blur = cfg.blur;
     monet = {
       enable = cfg.monet.enable;
@@ -313,13 +305,8 @@ let
       }
 
       build_swww_args() {
-        local profile="''${1:-normal}"
         local ttype tfps tduration tbezier tstep
         local base_path=".swww.transition"
-
-        if [ "$profile" = "focus-blur" ]; then
-          base_path=".focusBlur.swww.transition"
-        fi
 
         ttype="$(jq -r "''${base_path}.type // empty" "$config_file")"
         tfps="$(jq -r "''${base_path}.fps // empty" "$config_file")"
@@ -421,7 +408,6 @@ let
 
       apply_wallpaper() {
         local apply_blur="''${1:-0}"
-        local transition_profile="''${2:-normal}"
         read_state
 
         local state_changed=0
@@ -460,7 +446,7 @@ let
         fi
 
         ensure_swww
-        build_swww_args "$transition_profile"
+        build_swww_args
         swww img "''${swww_args[@]}" "$target_path"
 
         local theme_spec desired_theme
@@ -595,8 +581,7 @@ let
           elif [ "''${WALLPAPER_FORCE_BLUR:-0}" = "1" ]; then
             apply_blur=1
           fi
-          transition_profile="''${WALLPAPER_TRANSITION_PROFILE:-normal}"
-          apply_wallpaper "$apply_blur" "$transition_profile"
+          apply_wallpaper "$apply_blur"
           ;;
         *)
           echo "usage: wallpaper <list|current|set|next|prev|mode|apply>" >&2
@@ -604,82 +589,6 @@ let
           exit 1
           ;;
       esac
-    '';
-  };
-
-  wallpaperFocusBlur = pkgs.writeShellApplication {
-    name = "wallpaper-focus-blur";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.jq
-      niriPackage
-      wallpaperScript
-    ];
-    text = ''
-      set -euo pipefail
-
-      wallpaper_cmd="${wallpaperScript}/bin/wallpaper"
-      niri_cmd="${niriPackage}/bin/niri"
-      interval_ms=${toString cfg.focusBlur.intervalMs}
-      sleep_duration="$(printf '%s.%03d\n' "$((interval_ms / 1000))" "$((interval_ms % 1000))")"
-
-      current_state="unknown"
-
-      have_focus() {
-        local output
-
-        if ! output="$("$niri_cmd" msg --json focused-window 2>/dev/null)"; then
-          return 2
-        fi
-
-        if [ -z "$output" ] || [ "$output" = "null" ]; then
-          return 1
-        fi
-
-        if echo "$output" | jq -e 'type == "null"' >/dev/null 2>&1; then
-          return 1
-        fi
-
-        if echo "$output" | jq -e 'type == "object"' >/dev/null 2>&1; then
-          return 0
-        fi
-
-        return 0
-      }
-
-      apply_state() {
-        local target="$1"
-
-        if [ "$current_state" = "$target" ]; then
-          return 0
-        fi
-
-        if [ "$target" = "blur" ]; then
-          WALLPAPER_TRANSITION_PROFILE=focus-blur WALLPAPER_FORCE_BLUR=1 "$wallpaper_cmd" apply --blur || return 1
-        else
-          WALLPAPER_TRANSITION_PROFILE=focus-blur "$wallpaper_cmd" apply --plain || return 1
-        fi
-
-        current_state="$target"
-      }
-
-      export WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-wayland-0}"
-
-      while true; do
-        if have_focus; then
-          apply_state "blur" || true
-        else
-          status=$?
-          if [ "$status" -eq 1 ]; then
-            apply_state "plain" || true
-          else
-            sleep "$sleep_duration"
-            continue
-          fi
-        fi
-
-        sleep "$sleep_duration"
-      done
     '';
   };
 in
@@ -771,7 +680,7 @@ in
       enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Enable generating blurred wallpapers for focus-based switching.";
+        description = "Enable generating blurred wallpapers for manual use.";
       };
       sigma = mkOption {
         type = types.float;
@@ -782,48 +691,6 @@ in
         type = types.nullOr types.float;
         default = null;
         description = "Gaussian blur radius (null to let ImageMagick decide).";
-      };
-    };
-
-    focusBlur = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable switching to blurred wallpaper when a window is focused (Niri only).";
-      };
-      intervalMs = mkOption {
-        type = types.int;
-        default = 500;
-        description = "Polling interval in milliseconds for focus detection.";
-      };
-      swww = {
-        transition = {
-          type = mkOption {
-            type = types.str;
-            default = "none";
-            description = "swww transition type for focus-based blur switching.";
-          };
-          duration = mkOption {
-            type = types.float;
-            default = 0.0;
-            description = "swww transition duration for focus-based blur switching.";
-          };
-          fps = mkOption {
-            type = types.nullOr types.int;
-            default = null;
-            description = "swww transition fps for focus-based blur switching (null to disable).";
-          };
-          bezier = mkOption {
-            type = types.nullOr types.str;
-            default = null;
-            description = "swww transition bezier for focus-based blur switching (null to disable).";
-          };
-          step = mkOption {
-            type = types.nullOr types.int;
-            default = 255;
-            description = "swww transition step for focus-based blur switching (null to disable).";
-          };
-        };
       };
     };
 
@@ -881,10 +748,6 @@ in
         assertion = defaultWallpaper == null || lib.elem defaultWallpaper wallpaperNames;
         message = "modules.wallpaper.defaultWallpaper must exist in wallpaper list.";
       }
-      {
-        assertion = (!cfg.focusBlur.enable) || cfg.focusBlur.intervalMs > 0;
-        message = "modules.wallpaper.focusBlur.intervalMs must be positive.";
-      }
     ];
 
     xdg.configFile.${paletteFile}.text = builtins.toJSON stylixPalette;
@@ -924,29 +787,6 @@ in
       };
       Install.WantedBy = [ "graphical-session.target" ];
     };
-
-    systemd.user.services.wallpaper-focus-blur =
-      lib.mkIf (cfg.focusBlur.enable && (config.programs ? niri && config.programs.niri.enable)) {
-        Unit = {
-          Description = "Switch wallpaper blur based on Niri focus";
-          PartOf = [ "graphical-session.target" ];
-          After = [
-            "graphical-session.target"
-            "wallpaper-apply.service"
-            "swww-daemon.service"
-          ];
-          Wants = [
-            "wallpaper-apply.service"
-            "swww-daemon.service"
-          ];
-        };
-        Service = {
-          ExecStart = "${wallpaperFocusBlur}/bin/wallpaper-focus-blur";
-          Restart = "on-failure";
-          RestartSec = 2;
-        };
-        Install.WantedBy = [ "graphical-session.target" ];
-      };
 
     home.activation.wallpaperMonetMap = lib.hm.dag.entryAfter [ "writeBoundary" ] (lib.optionalString cfg.monet.enable ''
       install -d ${lib.escapeShellArg cfg.stateDir}
