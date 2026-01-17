@@ -91,7 +91,8 @@
     {
       packages.win-clang-sysroot = winSysroot;
       devShells.win-clang = pkgs.mkShell {
-        packages = winPackages ++ [ winSysroot winWrappers ];
+        stdenv = pkgs.stdenvNoCC;
+        packages = [ winWrappers ] ++ winPackages ++ [ winSysroot ];
         XWIN_SYSROOT = "${winSysroot}";
         WIN_TARGET = "x86_64-pc-windows-msvc";
         CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
