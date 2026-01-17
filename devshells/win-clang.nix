@@ -44,7 +44,7 @@ _: {
           while [ "$dir" != "/" ]; do
             if [ -f "$dir/CMakeCache.txt" ]; then
               local target
-              target="$(awk -F= '/^WIN_TARGET:STRING=/{print $2; exit}' "$dir/CMakeCache.txt")"
+              target="$(awk -F= '/^WIN_TARGET:/{print $2; exit}' "$dir/CMakeCache.txt")"
               if [ -n "$target" ]; then
                 echo "$target"
                 return
@@ -152,7 +152,7 @@ _: {
           while [ "$dir" != "/" ]; do
             if [ -f "$dir/CMakeCache.txt" ]; then
               local target
-              target="$(awk -F= '/^WIN_TARGET:STRING=/{print $2; exit}' "$dir/CMakeCache.txt")"
+              target="$(awk -F= '/^WIN_TARGET:/{print $2; exit}' "$dir/CMakeCache.txt")"
               if [ -n "$target" ]; then
                 echo "$target"
                 return
