@@ -40,6 +40,7 @@
       imports = [
         ./hosts
         ./pkgs
+        ./devshells
       ];
 
     };
