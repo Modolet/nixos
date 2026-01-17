@@ -14,6 +14,44 @@
         ninja
         pkg-config
       ];
+      winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER clang-cl)
+        set(CMAKE_CXX_COMPILER clang-cl)
+        set(CMAKE_LINKER lld-link)
+        set(CMAKE_RC_COMPILER llvm-rc)
+        set(CMAKE_C_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
+        set(CMAKE_CXX_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
+        set(CMAKE_EXE_LINKER_FLAGS_INIT "--target=$ENV{WIN_TARGET} --winsysroot=$ENV{XWIN_SYSROOT}")
+        set(CMAKE_FIND_ROOT_PATH "$ENV{XWIN_SYSROOT}")
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+      '';
+      winWrappers = pkgs.runCommand "win-clang-wrappers" { } ''
+        mkdir -p "$out/bin"
+        cat > "$out/bin/cc" <<'EOF'
+        #!${pkgs.runtimeShell}
+        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
+          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        EOF
+        chmod +x "$out/bin/cc"
+
+        cat > "$out/bin/c++" <<'EOF'
+        #!${pkgs.runtimeShell}
+        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
+          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        EOF
+        chmod +x "$out/bin/c++"
+
+        cat > "$out/bin/cl" <<'EOF'
+        #!${pkgs.runtimeShell}
+        exec clang-cl --target="''${WIN_TARGET:-x86_64-pc-windows-msvc}" \
+          --winsysroot="''${XWIN_SYSROOT}" "$@"
+        EOF
+        chmod +x "$out/bin/cl"
+      '';
       winSysroot = pkgs.stdenvNoCC.mkDerivation {
         pname = "xwin-sysroot";
         inherit (pkgs.xwin) version;
@@ -53,10 +91,12 @@
     {
       packages.win-clang-sysroot = winSysroot;
       devShells.win-clang = pkgs.mkShell {
-        packages = winPackages ++ [ winSysroot ];
+        packages = winPackages ++ [ winSysroot winWrappers ];
         XWIN_SYSROOT = "${winSysroot}";
-        CC = "clang-cl";
-        CXX = "clang-cl";
+        WIN_TARGET = "x86_64-pc-windows-msvc";
+        CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
+        CC = "cc";
+        CXX = "c++";
         LD = "lld-link";
         AR = "llvm-lib";
         RC = "llvm-rc";
