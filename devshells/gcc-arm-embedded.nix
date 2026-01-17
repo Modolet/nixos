@@ -2,14 +2,11 @@ _: {
   perSystem =
     { pkgs, ... }:
     {
-      devShells.clang = pkgs.mkShell {
+      devShells.gcc-arm-embedded = pkgs.mkShell {
         packages = with pkgs; [
-          clang
-          clang-tools
-          lld
+          gcc-arm-embedded
           cmake
           ninja
-          pkg-config
         ];
       };
     };

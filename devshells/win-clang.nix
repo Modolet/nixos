@@ -1,18 +1,22 @@
-{ ... }:
-{
+_: {
   perSystem =
     { pkgs, ... }:
     let
       winSdkVersion = "10.0.26100";
       winCrtVersion = "14.44.17.14";
-      winPackages = with pkgs; [
-        clang
-        lld
-        llvm
-        xwin
-        cmake
-        ninja
-        pkg-config
+      llvmPkgs =
+        if pkgs ? llvmPackages_21 then
+          pkgs.llvmPackages_21
+        else
+          pkgs.llvmPackages;
+      winPackages = [
+        llvmPkgs.clang-unwrapped
+        llvmPkgs.lld
+        llvmPkgs.llvm
+        pkgs.xwin
+        pkgs.cmake
+        pkgs.ninja
+        pkgs.pkg-config
       ];
       winToolchainFile = pkgs.writeText "win-clang-toolchain.cmake" ''
         set(CMAKE_SYSTEM_NAME Windows)
@@ -167,6 +171,9 @@
         WIN_SDK_VERSION = winSdkVersion;
         WIN_CRT_VERSION = winCrtVersion;
         CMAKE_TOOLCHAIN_FILE = "${winToolchainFile}";
+        NIX_CFLAGS_COMPILE = "";
+        NIX_CFLAGS_LINK = "";
+        NIX_LDFLAGS = "";
         CC = "cc";
         CXX = "c++";
         LD = "lld-link";
