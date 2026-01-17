@@ -52,7 +52,7 @@ _: {
         needs_link=1
         for arg in "$@"; do
           case "$arg" in
-            -c|/c) needs_link=0 ;;
+            -c|/c|-E|/E|/EP|/P) needs_link=0 ;;
           esac
         done
         link_args=()
